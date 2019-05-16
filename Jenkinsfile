@@ -118,7 +118,6 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       //TODO - currently hard coded against v1.1 do we need this versioning stuff longer term?
       echo 'replacing templates...'
       sh "sed -e 's/{ZOWE_VERSION}/${zoweVersion}/g' artifactory-download-spec.json.template > artifactory-download-spec.json && rm artifactory-download-spec.json.template"
-      sh "sed -e 's/{ZOWE_VERSION}/${zoweVersion}/g' install/zowe-install.yaml.template > install/zowe-install.yaml && rm install/zowe-install.yaml.template"
 
       echo 'preparing SMPE Input...'
 
@@ -165,6 +164,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
         touch "smpe-workspace/output/AZWE001.pax.Z"
         touch "smpe-workspace/output/AZWE001.readme.txt"
       }
+    }
 
     stage('publish') {
 
