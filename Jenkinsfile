@@ -210,7 +210,6 @@ EOF"""
 // get -r /tmp/${BUILD_COMMIT_HASH}/smpe-workspace/output/
 // EOF"""
  sh 'pwd; ls -al;'
-    }
 
         successful = true
       } catch (ex1) {
