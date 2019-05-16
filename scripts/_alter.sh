@@ -17,7 +17,8 @@
 # PROD | SMPE  keyword indicating which install must be updated
 # dir          target directory ($INSTALL_DIR)
 
-new=/bld/zowe/_new             # location of overrides
+root=$(dirname $0) ; cd $root ; root=$PWD
+new=$root/_new                 # location of overrides
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
  IgNoRe_ErRoR=1                # no exit on error when not null  #debug
@@ -70,6 +71,7 @@ _cmd cp $new/copy.sh                             $dir/scripts
 # ---------------------------------------------------------------------
 function _smpe
 {
+_cmd cp $new/smpe-members.sh                               $dir 
 _cmd cp $new/ZWE1SMPE.jcl                                  $dir/MVS
 _cmd cp $new/ZWE2RCVE.jcl                                  $dir/MVS
 _cmd cp $new/ZWE3ALOC.jcl                                  $dir/MVS
@@ -79,7 +81,6 @@ _cmd cp $new/ZWE6DDEF.jcl                                  $dir/MVS
 _cmd cp $new/ZWE7APLY.jcl                                  $dir/MVS
 _cmd cp $new/ZWE8ACPT.jcl                                  $dir/MVS
 _cmd cp $new/ZWEMKDIR.rex                                  $dir/MVS
-_cmd cp $new/ZWEMOUNT.rex                                  $dir/MVS
 _cmd cp $new/ZWESHPAX.sh                                   $dir/USS
 _cmd cp $new/allocate-dataset.sh                           $dir/scripts
 _cmd cp $new/check-dataset-exist.sh                        $dir/scripts

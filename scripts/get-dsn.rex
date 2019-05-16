@@ -71,11 +71,11 @@ if cRC == 0 then cRC=_readCatalog(Dsn,'A')
 if debug then say '<' ExecName cRC
 exit cRC                                            /* LEAVE PROGRAM */
 
-/*-------------------------------------------------------------------*/
-_displayUsage: PROCEDURE EXPOSE ExecName
-/*
+/*-------------------------------------------------------------------
  * --- display script usage information
+ * returns nothing
  */
+_displayUsage: PROCEDURE EXPOSE ExecName
 say ''
 say ' 'ExecName
 T=0
@@ -92,11 +92,9 @@ end    /* while T */
 say ''
 return    /* _displayUsage */
 
-/*-------------------------------------------------------------------*/
-_readCatalog: PROCEDURE EXPOSE debug
-/*
- * --- returns in variable CSIlist a list of data set names that match
- *     the filter
+/*-------------------------------------------------------------------
+ * --- displays data set names that match the filter
+ * retuns return code
  *
  * Filter: limit catalog search to this mask (*, ** and % allowed)
  * Type  : (optional) up to 16 letters indicating which data set types 
@@ -110,6 +108,7 @@ _readCatalog: PROCEDURE EXPOSE debug
  *
  * documentation in "DFSMS: Managing Catalogs (SC23-6853)"
  */
+_readCatalog: PROCEDURE EXPOSE debug
 parse upper arg Filter,Type,Vsam       /* get arguments in uppercase */
 if Type == '' then Type=' '         /* default: Type=' ' (allow all) */
 if Vsam == '' then Vsam=' '      /* default: Vsam=' ' (only cluster) */

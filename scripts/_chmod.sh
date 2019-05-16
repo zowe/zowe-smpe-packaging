@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-root=/bld/zowe
+root=$(dirname $0) ; cd $root ; root=$PWD
 
 chmod 755 $(find $root -level 0 -type f) 2>&1
 chtag -r  $(find $root -level 0 -type f) 2>&1

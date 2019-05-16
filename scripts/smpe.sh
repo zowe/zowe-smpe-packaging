@@ -203,7 +203,17 @@ _stopAt smpe-split.sh $debug -c $YAML $opts
 _cmd $here/smpe-split.sh $debug -c $YAML $opts
 # result (final): $ussI                                      # pax data
 
-# TODO if PTF then build ++PTF otherwise build ++FUNCTION
+# create FMID
+opts=""
+_stopAt smpe-fmid.sh $debug -c $YAML $opts
+_cmd $here/smpe-fmid.sh $debug -c $YAML $opts
+# result (final): $ussI                                      # pax data
+
+# create service
+opts=""
+_stopAt smpe-service.sh $debug -c $YAML $opts
+_cmd $here/smpe-service.sh $debug -c $YAML $opts
+# result (final): $ussI                                      # pax data
 
 echo "-- completed $me 0"
 test "$debug" && echo "< $me 0"

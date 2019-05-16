@@ -2,9 +2,7 @@
 #
 # build smpe.pax
 #
-vrm=1.1.0
-root=/bld/zowe
-download=$root/downloads/tst/zowe-$vrm
+root=$(dirname $0) ; cd $root ; root=$PWD
 
 echo "set stage"
 chmod 755 $(find $root/_new -level 0 -type f) 2>&1
@@ -19,10 +17,9 @@ echo "rebuild"
 mkdir -p MVS 2>&1
 mkdir -p USS 2>&1
 mkdir -p scripts 2>&1
-cp ../ZWE[[:digit:]]* ../ZWEMKDIR.rex ../ZWEMOUNT.rex MVS/ 2>&1
+cp ../ZWE[[:digit:]]* ../ZWEMKDIR.rex MVS/ 2>&1
 cp ../ZWESHPAX.sh USS/ 2>&1
-cp ../ZWESHPAX.sh USS/ 2>&1
-cp ../alloc-dataset.sh ../check-dataset-exist.sh \
+cp ../allocate-dataset.sh ../check-dataset-exist.sh \
    ../check-dataset-dcb.sh scripts 2>&1
 cp ../smpe-members.sh . 2>&1
 

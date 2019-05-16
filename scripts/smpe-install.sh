@@ -53,8 +53,8 @@
 smpeFilter="/smpe"             # regex to find SMP/E archive name
 prodScript=install/zowe-install.sh  # product install script
 smpeScript=smpe-members.sh     # SMP/E-member install script
-cfgScript=get-config.sh        # script to read smpe.yaml config data
 csiScript=get-dsn.rex          # catalog search interface (CSI) script
+cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
