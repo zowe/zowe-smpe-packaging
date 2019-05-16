@@ -153,6 +153,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
 
       // debug purpose, list all files in workspace
       sh 'find ./smpe-workspace -print'
+      sh 'cat ./smpe-workspace/ascii/scripts/smpe.sh'
     }
 
     stage('package') {
