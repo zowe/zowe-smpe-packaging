@@ -149,6 +149,41 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       //sh "rsync -rv --include '*.json' --include '*.html' --include '*.jcl' --include '*.template' --exclude '*.zip' --exclude '*.png' --exclude '*.tgz' --exclude '*.tar.gz' --exclude '*.pax' --exclude '*.jar' --prune-empty-dirs --remove-source-files pax-workspace/content/zowe-${zoweVersion}/files pax-workspace/ascii"
       sh 'cp -R scripts/* smpe-workspace/ascii/scripts'
 
+      //Move to river:
+    withCredentials([usernamePassword(credentialsId: SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+      def failure
+      try {
+        // send to pax server
+        sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b -p ${SERVER_PORT} ${USERNAME}@${SERVER_IP} << EOF
+put -r smpe-workspace /tmp/${BUILD_COMMIT_HASH}
+EOF"""
+//         // extract tar file, run pre/post hooks and create pax file
+//         
+//         // copy back pax file
+//         sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${serverIP} << EOF
+// get ${serverWorkplace}/${paxFileName} ${workspace}
+// EOF"""
+        successful = true
+      } catch (ex1) {
+        // display errors
+        echo "${func}[error] in packaging: ${ex1}"
+        failure = ex1
+      }
+
+      try {
+        // clean up temporary files/folders
+        echo "${func} cleaning up ..."
+        sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no ${USERNAME}@${serverIP} \"rm -fr ${serverWorkplaceRoot}/${jobId}-${branch}-*\""
+      } catch (ex2) {
+        // ignore errors for cleaning up
+      }
+
+      if (failure) {
+        throw failure
+      }
+    }
+
+
 //TODO 2a. Check codepages are correct as JCL is stored in ASCII in github and needs to be EBCDIC on river
 
       // debug purpose, list all files in workspace
@@ -160,10 +195,22 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       echo "creating smpe file from workspace..."
       timeout(time: 20, unit: 'MINUTES') {
         echo "excute smpe.sh"
-        sh 'pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/hello.sh; "./smpe-workspace/ascii/scripts/hello.sh"'
-        sh 'pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/smpe.sh; "./smpe-workspace/ascii/scripts/smpe.sh -?"' //TODO passing in output HLQ, output zFS folder, smpe.input location
-        sh 'touch ./smpe-workspace/output/AZWE001.pax.Z'
-        sh 'touch ./smpe-workspace/output/AZWE001.readme.txt'
+        sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -P ${SERVER_PORT} ${USERNAME}@${serverIP} << EOF
+        pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/hello.sh; "./smpe-workspace/ascii/scripts/hello.sh"
+        pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/smpe.sh; "./smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
+        touch ./smpe-workspace/output/AZWE001.pax.Z
+        touch ./smpe-workspace/output/AZWE001.readme.txt
+  EOF"""
+  // iconv -f ISO8859-1 -t IBM-1047 ${serverWorkplaceRoot}/${packageScriptFile} > ${serverWorkplaceRoot}/${packageScriptFile}.new
+  // mv ${serverWorkplaceRoot}/${packageScriptFile}.new ${serverWorkplaceRoot}/${packageScriptFile}
+  // chmod +x ${serverWorkplaceRoot}/${packageScriptFile}
+  // . ${serverWorkplaceRoot}/${packageScriptFile}
+
+// copy back files
+  sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${serverIP} << EOF
+// get -r /tmp/${BUILD_COMMIT_HASH}/smpe-workspace/output/
+// EOF"""
+  sh 'pwd; ls -al;'
       }
     }
 
