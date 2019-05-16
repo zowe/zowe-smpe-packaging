@@ -196,41 +196,42 @@ EOF"""
       timeout(time: 20, unit: 'MINUTES') {
         echo "excute smpe.sh"
             withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-      def failure
-      try {
-        // send to pax server
-               sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-        pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/hello.sh; "./smpe-workspace/ascii/scripts/hello.sh"
-        pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/smpe.sh; "./smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
-        touch ./smpe-workspace/output/AZWE001.pax.Z
-        touch ./smpe-workspace/output/AZWE001.readme.txt
-  EOF"""
-  // copy back output files
-   sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
-// get -r /tmp/${BUILD_COMMIT_HASH}/smpe-workspace/output/
-// EOF"""
- sh 'pwd; ls -al;'
+          def failure
+          try {
+            // send to pax server
+                  sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
+            pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/hello.sh; "./smpe-workspace/ascii/scripts/hello.sh"
+            pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/smpe.sh; "./smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
+            touch ./smpe-workspace/output/AZWE001.pax.Z
+            touch ./smpe-workspace/output/AZWE001.readme.txt
+      EOF"""
+      // copy back output files
+      sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
+    // get -r /tmp/${BUILD_COMMIT_HASH}/smpe-workspace/output/
+    // EOF"""
+    sh 'pwd; ls -al;'
 
-        successful = true
-      } catch (ex1) {
-        // display errors
-        echo "${func}[error] in packaging: ${ex1}"
-        failure = ex1
-      }
+            successful = true
+          } catch (ex1) {
+            // display errors
+            echo "${func}[error] in packaging: ${ex1}"
+            failure = ex1
+          }
 
-      try {
-        // clean up temporary files/folders
-        echo "${func} cleaning up ..."
-        sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no ${USERNAME}@${serverIP} \"rm -fr ${serverWorkplaceRoot}/${jobId}-${branch}-*\""
-      } catch (ex2) {
-        // ignore errors for cleaning up
-      }
+          try {
+            // clean up temporary files/folders
+            echo "${func} cleaning up ..."
+            sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no ${USERNAME}@${serverIP} \"rm -fr ${serverWorkplaceRoot}/${jobId}-${branch}-*\""
+          } catch (ex2) {
+            // ignore errors for cleaning up
+          }
 
-      if (failure) {
-        throw failure
+          if (failure) {
+            throw failure
+          }
+        }
       }
     }
-
 
     stage('publish') {
 
