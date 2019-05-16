@@ -153,7 +153,6 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
 
       // debug purpose, list all files in workspace
       sh 'find ./smpe-workspace -print'
-      sh 'cat ./smpe-workspace/ascii/scripts/smpe.sh'
     }
 
     stage('package') {
@@ -161,7 +160,8 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       echo "creating smpe file from workspace..."
       timeout(time: 20, unit: 'MINUTES') {
         echo "excute smpe.sh"
-        sh 'pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; "./smpe-workspace/ascii/scripts/smpe.sh -?"' //TODO passing in output HLQ, output zFS folder, smpe.input location
+        sh 'pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/hello.sh; "./smpe-workspace/ascii/scripts/hello.sh"' //TODO passing in output HLQ, output zFS folder, smpe.input location
+        sh 'pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/smpe.sh; "./smpe-workspace/ascii/scripts/smpe.sh -?"' //TODO passing in output HLQ, output zFS folder, smpe.input location
         sh 'touch ./smpe-workspace/output/AZWE001.pax.Z'
         sh 'touch ./smpe-workspace/output/AZWE001.readme.txt'
       }
