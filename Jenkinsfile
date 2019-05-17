@@ -115,7 +115,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       }
     }
 
-    /*stage('prepare') {
+    stage('prepare') {
       // replace templates
       //TODO - currently hard coded against v1.1 do we need this versioning stuff longer term?
       echo 'replacing templates...'
@@ -199,10 +199,9 @@ EOF"""
           throw failure
         }
       }
-    }*/
+    }
 
     stage('package') {
-      commitHash = "d30e64e1dcebbeb9cf2b79c37320c873efb155d8"
       // scp files and ssh to z/OS to pax workspace
       echo "creating smpe file from workspace..."
       timeout(time: 20, unit: 'MINUTES') {
@@ -210,15 +209,14 @@ EOF"""
             withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
           def failure
           try {
-            // execute smpe.sh on remote machine
-//                   sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-// /tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh
-// /tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?
-// touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.pax.Z
-// touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
-// EOF"""
+            execute smpe.sh on remote machine
+                  sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
+/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh
+/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?
+touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.pax.Z
+touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
+EOF"""
       // copy back output files
-      sh "mkdir -p smpe-workspace/output" //TODO - remove this
       sh 'cd ./smpe-workspace/output/'
       sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
 get -r /tmp/${commitHash}/smpe-workspace/output/
