@@ -220,7 +220,7 @@ EOF"""
 // EOF"""
       // copy back output files
       sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
-get -r /tmp/${BUILD_COMMIT_HASH}/smpe-workspace/output/
+get -r /tmp/${commitHash}/smpe-workspace/output/
 EOF"""
     sh 'pwd; ls -al;'
 
