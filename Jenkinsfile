@@ -14,6 +14,7 @@
 def isPullRequest = env.BRANCH_NAME.startsWith('PR-')
 def zoweVersion = null
 def func = "[smpePackage]"
+def commitHash = ""
 
 def opts = []
 // keep last 20 builds for regular branches, no keep for pull requests
@@ -84,7 +85,7 @@ node ('ibm-jenkins-slave-nvm-jnlp') {
     }
 
     stage('config') {
-      def commitHash = sh(script: 'git rev-parse --verify HEAD', returnStdout: true).trim()
+      commitHash = sh(script: 'git rev-parse --verify HEAD', returnStdout: true).trim()
 
 //TODO - currently hard coded against v1.1 do we need this versioning stuff longer term?
       sh """
