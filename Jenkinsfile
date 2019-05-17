@@ -34,7 +34,7 @@ customParameters.push(credentials(
   name: 'SERVER_CREDENTIALS_ID',
   description: 'The server credential used to create PASMPEX file',
   credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
-  defaultValue: 'ssh-zdt-test-image-guest-fvt',
+  defaultValue: 'riverTstradm',
   required: true
 ))
 customParameters.push(string(
@@ -157,7 +157,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       def failure
       try {
         // send to pax server
-        sh """SSHPASS=${PASSWORD} sshpass -e sftp -p ${params.SERVER_PORT} -o BatchMode=no -o StrictHostKeyChecking=no -b ${USERNAME}@${params.SERVER_IP} << EOF
+        sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} -b ${USERNAME}@${params.SERVER_IP} << EOF
 put -r smpe-workspace /tmp/${commitHash}
 EOF"""
         successful = true
