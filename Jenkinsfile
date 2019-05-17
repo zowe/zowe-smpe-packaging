@@ -184,6 +184,7 @@ try {
         sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
            cd /tmp/${commitHash}/smpe-workspace/ascii/scripts
            iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
+           chmod a+x convert_ebcdic.sh
            ./convert_ebcdic.sh
       EOF"""
       } catch (ex1) {
