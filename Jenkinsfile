@@ -158,7 +158,6 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
         
         try {
           // Create folder ready to receive
-          echo "${func} cleaning up ..."
           sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"mkdir -p /tmp/${commitHash}/smpe-workspace\""
         } catch (ex1) {
               // display errors
@@ -220,10 +219,10 @@ EOF"""
 // EOF"""
       // copy back output files
       sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
-get -r /tmp/${commitHash}/smpe-workspace/output/
+get -r /tmp/${commitHash}/smpe-workspace/output/ ./smpe-workspace/output/
 EOF"""
     sh 'pwd; ls -al;'
-
+            sh 'find ./smpe-workspace/output/ -print'
             successful = true
           } catch (ex1) {
             // display errors
@@ -234,7 +233,7 @@ EOF"""
           try {
             // clean up temporary files/folders
             echo "${func} cleaning up ..."
-            sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no ${USERNAME}@${params.SERVER_IP} \"rm -fr /tmp/${commitHash}\""
+            sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"rm -fr /tmp/${commitHash}\""
           } catch (ex2) {
             // ignore errors for cleaning up
           }
