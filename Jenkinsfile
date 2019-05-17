@@ -115,7 +115,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       }
     }
 
-    stage('prepare') {
+    /*stage('prepare') {
       // replace templates
       //TODO - currently hard coded against v1.1 do we need this versioning stuff longer term?
       echo 'replacing templates...'
@@ -200,9 +200,10 @@ EOF"""
           throw failure
         }
       }
-    }
+    }*/
 
     stage('package') {
+      commitHash = d30e64e1dcebbeb9cf2b79c37320c873efb155d8
       // scp files and ssh to z/OS to pax workspace
       echo "creating smpe file from workspace..."
       timeout(time: 20, unit: 'MINUTES') {
