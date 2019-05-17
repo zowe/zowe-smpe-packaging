@@ -158,7 +158,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       try {
         // send to smpe server
         sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} -b - ${USERNAME}@${params.SERVER_IP} << EOF
-put -r smpe-workspace /tmp/${commitHash}
+put -r smpe-workspace /tmp/
 EOF"""
         successful = true
       } catch (ex1) {
@@ -170,7 +170,7 @@ EOF"""
       try {
         // clean up temporary files/folders
         echo "${func} cleaning up ..."
-        sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.serverIP} \"rm -fr ${serverWorkplaceRoot}/${jobId}-${branch}-*\""
+        sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.serverIP} \"rm -fr /tmp/smpe-workspace\""
       } catch (ex2) {
         // ignore errors for cleaning up
       }
