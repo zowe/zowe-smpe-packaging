@@ -185,8 +185,8 @@ try {
            for f in /tmp/${commitHash}/smpe-workspace/ascii/scripts
 do
   echo "Processing $f file..."
-  iconv -f ISO8859-1 -t IBM-1047 $f > $f.new
-  mv $f.new $f
+  iconv -f ISO8859-1 -t IBM-1047 $f > temp
+  mv temp $f
 done
       EOF"""
       } catch (ex1) {
