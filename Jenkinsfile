@@ -213,8 +213,9 @@ EOF"""
           try {
             // execute smpe.sh on remote machine
                   sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh"
-pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
+/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh
+cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh
+/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?
 touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.pax.Z
 touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
 EOF"""
