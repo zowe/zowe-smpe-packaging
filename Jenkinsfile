@@ -218,6 +218,7 @@ EOF"""
 // touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
 // EOF"""
       // copy back output files
+      sh "mkdir -p smpe-workspace/output" //TODO - remove this
       sh 'cd ./smpe-workspace/output/'
       sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
 get -r /tmp/${commitHash}/smpe-workspace/output/
