@@ -198,10 +198,10 @@ EOF"""
           try {
             // send to pax server
                   sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-            pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/hello.sh; "./smpe-workspace/ascii/scripts/hello.sh"
-            pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/smpe.sh; "./smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
-            touch ./smpe-workspace/output/AZWE001.pax.Z
-            touch ./smpe-workspace/output/AZWE001.readme.txt
+            pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh"
+            pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
+            touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.pax.Z
+            touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
       EOF"""
       // copy back output files
       sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
