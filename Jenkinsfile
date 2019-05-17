@@ -30,21 +30,21 @@ if (env.BRANCH_NAME == 'master') {
 def customParameters = []
 customParameters.push(credentials(
   name: 'SERVER_CREDENTIALS_ID',
-  description: 'The server credential used to create PAX file',
+  description: 'The server credential used to create PASMPEX file',
   credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
-  defaultValue: 'TestAdminzOSaaS2',
+  defaultValue: 'ssh-zdt-test-image-guest-fvt',
   required: true
 ))
 customParameters.push(string(
   name: 'SERVER_IP',
-  description: 'The server IP used to create PAX file',
-  defaultValue: '172.30.0.1',
+  description: 'The server IP used to create SMPE file',
+  defaultValue: 'river.zowe.org',
   trim: true
 ))
 customParameters.push(string(
   name: 'SERVER_PORT',
-  description: 'The server port used to create PAX file',
-  defaultValue: '22',
+  description: 'The server port used to create SMPE file',
+  defaultValue: '2022',
   trim: true
 ))
 customParameters.push(string(
