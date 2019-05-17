@@ -13,6 +13,7 @@
 
 def isPullRequest = env.BRANCH_NAME.startsWith('PR-')
 def zoweVersion = null
+def func = "[smpePackage]"
 
 def opts = []
 // keep last 20 builds for regular branches, no keep for pull requests
