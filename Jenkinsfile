@@ -152,58 +152,54 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       sh 'cp -R scripts/* smpe-workspace/ascii/scripts'
 
       //Move to river:
-    withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-      echo "user: ${USERNAME} password: ${PASSWORD}"
-      def failure
-      
-      try {
-        // Create folder ready to receive
-        echo "${func} cleaning up ..."
-        sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"mkdir -p /tmp/${commitHash}/smpe-workspace\""
-      } catch (ex1) {
-            // display errors
-            echo "${func}[error] in packaging: ${ex1}"
-            failure = ex1
-          }
-      
-      try {
-        // send to smpe server
-        sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} -b - ${USERNAME}@${params.SERVER_IP} << EOF
-put -r smpe-workspace /tmp/${commitHash}
-EOF"""
-        successful = true
-      } catch (ex1) {
-        // display errors
-        echo "${func}[error] in packaging: ${ex1}"
-        failure = ex1
+      withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+        echo "user: ${USERNAME} password: ${PASSWORD}"
+        def failure
+        
+        try {
+          // Create folder ready to receive
+          echo "${func} cleaning up ..."
+          sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"mkdir -p /tmp/${commitHash}/smpe-workspace\""
+        } catch (ex1) {
+              // display errors
+              echo "${func}[error] in packaging: ${ex1}"
+              failure = ex1
+            }
+        
+        try {
+          // send to smpe server
+          sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} -b - ${USERNAME}@${params.SERVER_IP} << EOF
+  put -r smpe-workspace /tmp/${commitHash}
+  EOF"""
+          successful = true
+        } catch (ex1) {
+          // display errors
+          echo "${func}[error] in packaging: ${ex1}"
+          failure = ex1
+        }
+
+        try {
+          //convert script files
+          echo "${func} cleaning up ..."
+          sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
+            cd /tmp/${commitHash}/smpe-workspace/ascii/scripts
+            iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
+            chmod a+x convert_ebcdic.sh
+            ./convert_ebcdic.sh
+            echo "Done processing"
+          EOF"""
+          echo "Finished prep"
+          successful = true
+        } catch (ex1) {
+              // display errors
+              echo "${func}[error] in packaging: ${ex1}"
+              failure = ex1
+            }
+
+        if (failure) {
+          throw failure
+        }
       }
-
-      try {
-        //convert script files
-        echo "${func} cleaning up ..."
-        sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-           cd /tmp/${commitHash}/smpe-workspace/ascii/scripts
-           iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
-           chmod a+x convert_ebcdic.sh
-           ./convert_ebcdic.sh
-           echo "Done processing"
-      EOF"""
-      } catch (ex1) {
-            // display errors
-            echo "${func}[error] in packaging: ${ex1}"
-            failure = ex1
-          }
-
-      if (failure) {
-        throw failure
-      }
-    }
-
-
-//TODO 2a. Check codepages are correct as JCL is stored in ASCII in github and needs to be EBCDIC on river
-
-      // debug purpose, list all files in workspace
-      sh 'find ./smpe-workspace -print'
     }
 
     stage('package') {
@@ -214,7 +210,7 @@ EOF"""
             withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
           def failure
           try {
-            // send to pax server
+            // execute smpe.sh on remote machine
                   sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
             pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh"
             pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
