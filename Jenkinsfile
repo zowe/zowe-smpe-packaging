@@ -157,7 +157,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       def failure
       try {
         // send to pax server
-        sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
+        sh """SSHPASS=${PASSWORD} sshpass -e sftp -p ${params.SERVER_PORT} -o BatchMode=no -o StrictHostKeyChecking=no -b ${USERNAME}@${params.SERVER_IP} << EOF
 put -r smpe-workspace /tmp/${commitHash}
 EOF"""
         successful = true
