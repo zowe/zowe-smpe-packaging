@@ -182,12 +182,9 @@ try {
         //convert script files
         echo "${func} cleaning up ..."
         sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-           for f in /tmp/${commitHash}/smpe-workspace/ascii/scripts
-do
-  echo "Processing $f file..."
-  iconv -f ISO8859-1 -t IBM-1047 $f > temp
-  mv temp $f
-done
+           cd /tmp/${commitHash}/smpe-workspace/ascii/scripts
+           iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
+           ./convert_ebcdic.sh
       EOF"""
       } catch (ex1) {
             // display errors
