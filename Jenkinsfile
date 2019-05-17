@@ -160,9 +160,11 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
         // Create folder ready to receive
         echo "${func} cleaning up ..."
         sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"mkdir -p /tmp/${commitHash}/smpe-workspace\""
-      } catch (ex2) {
-        // ignore errors for cleaning up
-      }
+      } catch (ex1) {
+            // display errors
+            echo "${func}[error] in packaging: ${ex1}"
+            failure = ex1
+          }
       
       try {
         // send to smpe server
@@ -175,6 +177,23 @@ EOF"""
         echo "${func}[error] in packaging: ${ex1}"
         failure = ex1
       }
+
+try {
+        //convert script files
+        echo "${func} cleaning up ..."
+        sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
+           for f in /tmp/${commitHash}/smpe-workspace/ascii/scripts
+do
+  echo "Processing $f file..."
+  iconv -f ISO8859-1 -t IBM-1047 $f > $f.new
+  mv $f.new $f
+done
+      EOF"""
+      } catch (ex1) {
+            // display errors
+            echo "${func}[error] in packaging: ${ex1}"
+            failure = ex1
+          }
 
       if (failure) {
         throw failure
