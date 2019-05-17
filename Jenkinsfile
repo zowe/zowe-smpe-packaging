@@ -157,7 +157,7 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
       def failure
       
       try {
-        // clean up temporary files/folders
+        // Create folder ready to receive
         echo "${func} cleaning up ..."
         sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"mkdir -p /tmp/${commitHash}/smpe-workspace\""
       } catch (ex2) {
@@ -175,14 +175,6 @@ EOF"""
         echo "${func}[error] in packaging: ${ex1}"
         failure = ex1
       }
-
-      // try {
-      //   // clean up temporary files/folders
-      //   echo "${func} cleaning up ..."
-      //   sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"rm -fr /tmp/${commitHash}\""
-      // } catch (ex2) {
-      //   // ignore errors for cleaning up
-      // }
 
       if (failure) {
         throw failure
@@ -205,7 +197,7 @@ EOF"""
           def failure
           try {
             // send to pax server
-                  sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
+                  sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
             pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/hello.sh; "./smpe-workspace/ascii/scripts/hello.sh"
             pwd; ls -al; ls -al ./smpe-workspace/ascii/scripts; cat ./smpe-workspace/ascii/scripts/smpe.sh; "./smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
             touch ./smpe-workspace/output/AZWE001.pax.Z
@@ -227,7 +219,7 @@ EOF"""
           try {
             // clean up temporary files/folders
             echo "${func} cleaning up ..."
-            sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no ${USERNAME}@${params.SERVER_IP} \"rm -fr /tmp/${BUILD_COMMIT_HASH}\""
+            sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no ${USERNAME}@${params.SERVER_IP} \"rm -fr /tmp/${commitHash}\""
           } catch (ex2) {
             // ignore errors for cleaning up
           }
