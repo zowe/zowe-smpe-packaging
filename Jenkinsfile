@@ -178,7 +178,7 @@ EOF"""
         failure = ex1
       }
 
-try {
+      try {
         //convert script files
         echo "${func} cleaning up ..."
         sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
@@ -186,6 +186,7 @@ try {
            iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
            chmod a+x convert_ebcdic.sh
            ./convert_ebcdic.sh
+           echo "Done processing"
       EOF"""
       } catch (ex1) {
             // display errors
