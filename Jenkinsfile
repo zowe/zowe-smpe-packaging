@@ -151,36 +151,37 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
 
       //Move to river:
     withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-      def failure
-      try {
-        // send to pax server
-        sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-put -r smpe-workspace /tmp/${BUILD_COMMIT_HASH}
-EOF"""
-//         // extract tar file, run pre/post hooks and create pax file
-//         
-//         // copy back pax file
-//         sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${serverIP} << EOF
-// get ${serverWorkplace}/${paxFileName} ${workspace}
+      echo "user: ${USERNAME} password: ${PASSWORD}"
+//       def failure
+//       try {
+//         // send to pax server
+//         sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
+// put -r smpe-workspace /tmp/${BUILD_COMMIT_HASH}
 // EOF"""
-        successful = true
-      } catch (ex1) {
-        // display errors
-        echo "${func}[error] in packaging: ${ex1}"
-        failure = ex1
-      }
+// //         // extract tar file, run pre/post hooks and create pax file
+// //         
+// //         // copy back pax file
+// //         sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${serverIP} << EOF
+// // get ${serverWorkplace}/${paxFileName} ${workspace}
+// // EOF"""
+//         successful = true
+//       } catch (ex1) {
+//         // display errors
+//         echo "${func}[error] in packaging: ${ex1}"
+//         failure = ex1
+//       }
 
-      try {
-        // clean up temporary files/folders
-        echo "${func} cleaning up ..."
-        sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.serverIP} \"rm -fr ${serverWorkplaceRoot}/${jobId}-${branch}-*\""
-      } catch (ex2) {
-        // ignore errors for cleaning up
-      }
+//       try {
+//         // clean up temporary files/folders
+//         echo "${func} cleaning up ..."
+//         sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.serverIP} \"rm -fr ${serverWorkplaceRoot}/${jobId}-${branch}-*\""
+//       } catch (ex2) {
+//         // ignore errors for cleaning up
+//       }
 
-      if (failure) {
-        throw failure
-      }
+//       if (failure) {
+//         throw failure
+//       }
     }
 
 
