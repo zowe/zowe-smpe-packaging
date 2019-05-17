@@ -169,8 +169,8 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
         try {
           // send to smpe server
           sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} -b - ${USERNAME}@${params.SERVER_IP} << EOF
-  put -r smpe-workspace /tmp/${commitHash}
-  EOF"""
+put -r smpe-workspace /tmp/${commitHash}
+EOF"""
           successful = true
         } catch (ex1) {
           // display errors
@@ -182,12 +182,12 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
           //convert script files
           echo "${func} cleaning up ..."
           sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-            cd /tmp/${commitHash}/smpe-workspace/ascii/scripts
-            iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
-            chmod a+x convert_ebcdic.sh
-            ./convert_ebcdic.sh
-            echo "Done processing"
-          EOF"""
+cd /tmp/${commitHash}/smpe-workspace/ascii/scripts
+iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
+chmod a+x convert_ebcdic.sh
+./convert_ebcdic.sh
+echo "Done processing"
+EOF"""
           echo "Finished prep"
           successful = true
         } catch (ex1) {
@@ -212,15 +212,15 @@ sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
           try {
             // execute smpe.sh on remote machine
                   sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-            pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh"
-            pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
-            touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.pax.Z
-            touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
-      EOF"""
+pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh"
+pwd; ls -al; ls -al /tmp/${commitHash}/smpe-workspace/ascii/scripts; cat /tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh; "/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?" #//TODO passing in output HLQ, output zFS folder, smpe.input location
+touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.pax.Z
+touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
+EOF"""
       // copy back output files
       sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
-    // get -r /tmp/${BUILD_COMMIT_HASH}/smpe-workspace/output/
-    // EOF"""
+get -r /tmp/${BUILD_COMMIT_HASH}/smpe-workspace/output/
+EOF"""
     sh 'pwd; ls -al;'
 
             successful = true
