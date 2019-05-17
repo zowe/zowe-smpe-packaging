@@ -218,10 +218,12 @@ EOF"""
 // touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
 // EOF"""
       // copy back output files
+      sh 'cd ./smpe-workspace/output/'
       sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
-get -r /tmp/${commitHash}/smpe-workspace/output/ ./smpe-workspace/output/
+get -r /tmp/${commitHash}/smpe-workspace/output/
 EOF"""
-    sh 'pwd; ls -al;'
+            sh 'cd ../../'
+            sh 'pwd; ls -al;'
             sh 'find ./smpe-workspace/output/ -print'
             successful = true
           } catch (ex1) {
