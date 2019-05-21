@@ -20,7 +20,7 @@ echo "$FUNC content of $PWD...."
 find . -print
 
 # find zowe pax
-ZOWE_PAX=$(ls -1 zowe-*.pax | grep -V smpe)
+ZOWE_PAX=$(ls -1 zowe-*.pax | grep -v smpe)
 if [ -z "${ZOWE_PAX}" ]; then
   echo "Cannot find Zowe package."
   exit 1
