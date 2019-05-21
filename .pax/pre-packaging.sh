@@ -18,19 +18,19 @@ PWD=$(pwd)
 echo "$FUNC content of $PWD...."
 find . -print
 
-# make sure execute permission
-echo "$FUNC adjust execute permissions ..."
-chmod +x content/*.sh
-chmod +x content/USS/*.sh
-chmod +x content/scripts/*.sh
-chmod +x content/bld/*.sh
-
 # convert line endings
 echo "$FUNC removing windows line ending x0D ..."
 for f in $(find content -type f)
 do
   sed "s/$(printf '\x0D')$//" $f 2>&1 > $f.new && mv $f.new $f 2>&1
 done
+
+# make sure execute permission
+echo "$FUNC adjust execute permissions ..."
+chmod +x content/*.sh
+chmod +x content/USS/*.sh
+chmod +x content/scripts/*.sh
+chmod +x content/bld/*.sh
 
 # prepare /bld
 echo "$FUNC bld is not part of smpe.pax, moving out ..."
