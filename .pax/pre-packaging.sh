@@ -18,13 +18,13 @@ PWD=$(pwd)
 echo "$FUNC content of $PWD...."
 find . -print
 
-# find zowe pax
-ZOWE_PAX=$(ls -1 zowe-*.pax)
-if [ -z "${ZOWE_PAX}" ]; then
-  echo "Cannot find Zowe package."
-  exit 1
-fi
-echo "Zowe package is: ${ZOWE_PAX}"
+# make sure execute permission
+echo "$FUNC adjust execute permissions ..."
+chmod +x content/*.sh
+chmod +x content/USS/*.sh
+chmod +x content/scripts/*.sh
+chmod +x content/bld/*.sh
 
-# run smpe.sh
-./content/scripts/smpe.sh -i "${PWD}/${ZOWE_PAX}" -v 110 -a "${PWD}/content/scripts/_alter.sh"
+# prepare /bld
+echo "$FUNC bld is not part of smpe.pax, moving out ..."
+mv content/bld .

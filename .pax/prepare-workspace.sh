@@ -31,10 +31,12 @@ echo "[${SCRIPT_NAME}] cleaning PAX workspace ..."
 rm -fr "${PAX_WORKSPACE_DIR}/content"
 mkdir -p "${PAX_WORKSPACE_DIR}/content"
 rm -fr "${PAX_WORKSPACE_DIR}/ascii"
-mkdir -p "${PAX_WORKSPACE_DIR}/ascii/scripts"
+mkdir -p "${PAX_WORKSPACE_DIR}/ascii/bld"
 
 # copy smpe scripts
-cp -R scripts/* "${PAX_WORKSPACE_DIR}/ascii/scripts"
+# cp -R scripts/* "${PAX_WORKSPACE_DIR}/ascii/scripts"
+cp -R smpe/pax/. "${PAX_WORKSPACE_DIR}/ascii/"
+cp -R smpe/bld/. "${PAX_WORKSPACE_DIR}/ascii/bld"
 
 echo "[${SCRIPT_NAME}] ${PAX_WORKSPACE_DIR} folder is prepared."
 exit 0
