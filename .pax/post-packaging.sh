@@ -44,8 +44,8 @@ else
 fi
 
 echo "$FUNC pareparing ${INPUT_TXT} ..."
-echo "${PWD}/${ZOWE_PAX}\n" > "${INPUT_TXT}"
-echo "${PWD}/${ZOWE_CLI}\n" >> "${INPUT_TXT}"
+echo "${PWD}/${ZOWE_PAX}" > "${INPUT_TXT}"
+echo "${PWD}/${ZOWE_CLI}" >> "${INPUT_TXT}"
 echo "${PWD}/${SMPE_PAX}" >> "${INPUT_TXT}"
 echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
