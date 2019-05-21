@@ -27,16 +27,7 @@ done
 
 # make sure execute permission
 echo "$FUNC adjust execute permissions ..."
-for f in $(find content -name '*.sh' -type f)
-do
-  echo "$FUNC - $f"
-  chmod +x "$f"
-done
-for f in $(find content -name '*.rex' -type f)
-do
-  echo "$FUNC - $f"
-  chmod +x "$f"
-done
+chmod -R 755 content
 
 # prepare /bld
 echo "$FUNC bld is not part of smpe.pax, moving out ..."

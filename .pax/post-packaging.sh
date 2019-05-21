@@ -52,8 +52,8 @@ cat "${INPUT_TXT}"
 mkdir -p zowe
 
 # run smpe.sh
+#  -a "${PWD}/bld/_alter.sh" \
 ./bld/smpe.sh \
   -i "${PWD}/${INPUT_TXT}" \
   -v 110 \
-  -a "${PWD}/bld/_alter.sh" \
   -r "${PWD}/zowe"
