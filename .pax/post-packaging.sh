@@ -49,9 +49,11 @@ echo "${PWD}/${ZOWE_CLI}\n" >> "${INPUT_TXT}"
 echo "${PWD}/${SMPE_PAX}" >> "${INPUT_TXT}"
 echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
+mkdir -p zowe
 
 # run smpe.sh
-./build/smpe.sh \
+./bld/smpe.sh \
   -i "${PWD}/${INPUT_TXT}" \
   -v 110 \
-  -a "${PWD}/bld/_alter.sh"
+  -a "${PWD}/bld/_alter.sh" \
+  -r "${PWD}/zowe"
