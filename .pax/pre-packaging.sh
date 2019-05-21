@@ -27,4 +27,4 @@ fi
 echo "Zowe package is: ${ZOWE_PAX}"
 
 # run smpe.sh
-./content/scripts/smpe.sh -i "${PWD}/${ZOWE_PAX}" -v 110
+./content/scripts/smpe.sh -i "${PWD}/${ZOWE_PAX}" -v 110 -a "${PWD}/content/scripts/_alter.sh"
