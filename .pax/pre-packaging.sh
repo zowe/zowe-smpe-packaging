@@ -15,7 +15,7 @@ FUNC=[CreatePax][pre-packaging]
 PWD=$(pwd)
 
 # display extracted files
-echo "$FUNC content of $PWD...."
+echo "$FUNC content of $PWD before pre-packaging ...."
 find . -print
 
 # convert line endings
@@ -27,15 +27,21 @@ done
 
 # make sure execute permission
 echo "$FUNC adjust execute permissions ..."
-for f in $(find content -name *.sh -type f)
+for f in $(find content -name '*.sh' -type f)
 do
-  chmod +x $f
+  echo "$FUNC - $f"
+  chmod +x "$f"
 done
-for f in $(find content -name *.rex -type f)
+for f in $(find content -name '*.rex' -type f)
 do
-  chmod +x $f
+  echo "$FUNC - $f"
+  chmod +x "$f"
 done
 
 # prepare /bld
 echo "$FUNC bld is not part of smpe.pax, moving out ..."
 mv content/bld .
+
+# display extracted files
+echo "$FUNC content of $PWD after pre-packaging ...."
+find . -print
