@@ -7,306 +7,55 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * Copyright IBM Corporation 2019
+ * Copyright IBM Corporation 2018, 2019
  */
 
 
-def isPullRequest = env.BRANCH_NAME.startsWith('PR-')
-def zoweVersion = null
-def func = "[smpePackage]"
-def commitHash = ""
+node('ibm-jenkins-slave-nvm') {
+  def lib = library("jenkins-library").org.zowe.jenkins_shared_library
 
-def opts = []
-// keep last 20 builds for regular branches, no keep for pull requests
-opts.push(buildDiscarder(logRotator(numToKeepStr: (isPullRequest ? '' : '20'))))
-// disable concurrent build
-opts.push(disableConcurrentBuilds())
-// set upstream triggers
-if (env.BRANCH_NAME == 'master') {
-  opts.push(pipelineTriggers([
-    upstream(threshold: 'SUCCESS', upstreamProjects: '/zowe-install-test')
-  ]))
-}
+  def pipeline = lib.pipelines.generic.GenericPipeline.new(this)
 
-// define custom build parameters
-def customParameters = []
-customParameters.push(credentials(
-  name: 'SERVER_CREDENTIALS_ID',
-  description: 'The server credential used to create PASMPEX file',
-  credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
-  defaultValue: 'riverTstradm',
-  required: true
-))
-customParameters.push(string(
-  name: 'SERVER_IP',
-  description: 'The server IP used to create SMPE file',
-  defaultValue: 'river.zowe.org',
-  trim: true
-))
-customParameters.push(string(
-  name: 'SERVER_PORT',
-  description: 'The server port used to create SMPE file',
-  defaultValue: '2022',
-  trim: true
-))
-customParameters.push(string(
-  name: 'ARTIFACTORY_URL',
-  description: 'Artifactory URL',
-  defaultValue: 'https://gizaartifactory.jfrog.io/gizaartifactory',
-  trim: true,
-  required: true
-))
-customParameters.push(credentials(
-  name: 'ARTIFACTORY_SECRET',
-  description: 'Artifactory access secret',
-  credentialType: 'com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl',
-  defaultValue: 'GizaArtifactory',
-  required: true
-))
-opts.push(parameters(customParameters))
+  pipeline.admins.add("jackjia")
 
-// set build properties
-properties(opts)
+  pipeline.setup(
+    github: [
+      email                      : lib.Constants.DEFAULT_GITHUB_ROBOT_EMAIL,
+      usernamePasswordCredential : lib.Constants.DEFAULT_GITHUB_ROBOT_CREDENTIAL,
+    ],
+    artifactory: [
+      url                        : lib.Constants.DEFAULT_ARTIFACTORY_URL,
+      usernamePasswordCredential : lib.Constants.DEFAULT_ARTIFACTORY_ROBOT_CREDENTIAL,
+    ],
+    pax: [
+      sshHost                    : lib.Constants.DEFAULT_PAX_PACKAGING_SSH_HOST,
+      sshPort                    : lib.Constants.DEFAULT_PAX_PACKAGING_SSH_PORT,
+      sshCredential              : lib.Constants.DEFAULT_PAX_PACKAGING_SSH_CREDENTIAL,
+      remoteWorkspace            : lib.Constants.DEFAULT_PAX_PACKAGING_REMOTE_WORKSPACE,
+    ]
+  )
 
-node ('ibm-jenkins-slave-nvm-jnlp') {
-  currentBuild.result = 'SUCCESS'
+  pipeline.createStage(
+    name          : "Download Zowe",
+    isSkippable   : false,
+    stage         : {
+      pipeline.artifactory.download(
+        spec        : 'artifactory-download-spec.json.template',
+        expected    : 2
+      )
+    },
+    timeout: [time: 5, unit: 'MINUTES']
+  )
 
-  try {
+  // how we packaging jars/zips
+  pipeline.packaging(name: 'zowe-smpe')
 
-    stage('checkout') {
-      // checkout source code
-      checkout scm
+  // define we need publish stage
+  pipeline.publish(
+    artifacts: [
+      '.pax/zowe-smpe.pax'
+    ]
+  )
 
-      // check if it's pull request
-      echo "Current branch is ${env.BRANCH_NAME}"
-      if (isPullRequest) {
-        echo "This is a pull request"
-      }
-    }
-
-    stage('config') {
-      commitHash = sh(script: 'git rev-parse --verify HEAD', returnStdout: true).trim()
-
-//TODO - currently hard coded against v1.1 do we need this versioning stuff longer term?
-      sh """
-sed -e 's#{BUILD_BRANCH}#${env.BRANCH_NAME}#g' \
-    -e 's#{BUILD_NUMBER}#${env.BUILD_NUMBER}#g' \
-    -e 's#{BUILD_COMMIT_HASH}#${commitHash}#g' \
-    -e 's#{BUILD_TIMESTAMP}#${currentBuild.startTimeInMillis}#g' \
-    manifest.json.template > manifest.json
-"""
-      echo "Current manifest.json is:"
-      sh "cat manifest.json"
-
-      // load zowe version from manifest
-      zoweVersion = sh(
-        script: "cat manifest.json | jq -r '.version'",
-        returnStdout: true
-      ).trim()
-      if (zoweVersion) {
-        echo "Packaging Zowe v${zoweVersion} started..."
-      } else {
-        error "Cannot find Zowe version"
-      }
-
-      // prepare JFrog CLI configurations
-      withCredentials([usernamePassword(credentialsId: params.ARTIFACTORY_SECRET, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-        sh "jfrog rt config rt-server-1 --url=${params.ARTIFACTORY_URL} --user=${USERNAME} --password=${PASSWORD}"
-      }
-    }
-
-    stage('prepare') {
-      // replace templates
-      //TODO - currently hard coded against v1.1 do we need this versioning stuff longer term?
-      echo 'replacing templates...'
-      sh "sed -e 's/{ZOWE_VERSION}/${zoweVersion}/g' artifactory-download-spec.json.template > artifactory-download-spec.json && rm artifactory-download-spec.json.template"
-
-      echo 'preparing SMPE Input...'
-
-      // download artifactories
-      sh "echo 'Effective Artifactory download spec >>>>>>>' && cat artifactory-download-spec.json"
-      def downloadResult = sh(
-        script: "jfrog rt dl --spec=artifactory-download-spec.json",
-        returnStdout: true
-      ).trim()
-      echo "artifactory download result:"
-      echo downloadResult
-      def downloadResultObject = readJSON(text: downloadResult)
-      if (downloadResultObject['status'] != 'success' ||
-          downloadResultObject['totals']['success'] != 2 || downloadResultObject['totals']['failure'] != 0) {
-        echo "status: ${downloadResultObject['status']}"
-        echo "success: ${downloadResultObject['totals']['success']}"
-        echo "failure: ${downloadResultObject['totals']['failure']}"
-        error "Failed on verifying download result"
-      } else {
-        echo "download result is successful as expected"
-      }
-
-      // prepare folder
-      // - smpe-workspace/ascii holds ascii files and will be converted to IBM-1047 encoding TODO
-      sh 'mkdir -p smpe-workspace/ascii/scripts'
-      sh "mkdir -p smpe-workspace/output"
-      // copy from current github source
-      //sh "cp -R files/* smpe-workspace/content/zowe-${zoweVersion}/files"
-      //sh "rsync -rv --include '*.json' --include '*.html' --include '*.jcl' --include '*.template' --exclude '*.zip' --exclude '*.png' --exclude '*.tgz' --exclude '*.tar.gz' --exclude '*.pax' --exclude '*.jar' --prune-empty-dirs --remove-source-files pax-workspace/content/zowe-${zoweVersion}/files pax-workspace/ascii"
-      sh 'cp -R scripts/* smpe-workspace/ascii/scripts'
-
-      //Move to river:
-      withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-        echo "user: ${USERNAME} password: ${PASSWORD}"
-        def failure
-        
-        try {
-          // Create folder ready to receive
-          sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"mkdir -p /tmp/${commitHash}/smpe-workspace\""
-        } catch (ex1) {
-              // display errors
-              echo "${func}[error] in packaging: ${ex1}"
-              failure = ex1
-            }
-        
-        try {
-          // send to smpe server
-          sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -P ${params.SERVER_PORT} -b - ${USERNAME}@${params.SERVER_IP} << EOF
-put -r smpe-workspace /tmp/${commitHash}
-EOF"""
-          successful = true
-        } catch (ex1) {
-          // display errors
-          echo "${func}[error] in packaging: ${ex1}"
-          failure = ex1
-        }
-
-        try {
-          //convert script files
-          echo "${func} cleaning up ..."
-          sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-cd /tmp/${commitHash}/smpe-workspace/ascii/scripts
-iconv -f ISO8859-1 -t IBM-1047 convert.sh > convert_ebcdic.sh
-chmod a+x convert_ebcdic.sh
-./convert_ebcdic.sh
-echo "Done processing"
-EOF"""
-          echo "Finished prep"
-          successful = true
-        } catch (ex1) {
-              // display errors
-              echo "${func}[error] in packaging: ${ex1}"
-              failure = ex1
-            }
-
-        if (failure) {
-          throw failure
-        }
-      }
-    }
-
-    stage('package') {
-      // scp files and ssh to z/OS to pax workspace
-      echo "creating smpe file from workspace..."
-      timeout(time: 20, unit: 'MINUTES') {
-        echo "excute smpe.sh"
-            withCredentials([usernamePassword(credentialsId: params.SERVER_CREDENTIALS_ID, passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-          def failure
-          try {
-            execute smpe.sh on remote machine
-                  sh """SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} << EOF
-/tmp/${commitHash}/smpe-workspace/ascii/scripts/hello.sh
-/tmp/${commitHash}/smpe-workspace/ascii/scripts/smpe.sh -?
-touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.pax.Z
-touch /tmp/${commitHash}/smpe-workspace/output/AZWE001.readme.txt
-EOF"""
-      // copy back output files
-      sh 'cd ./smpe-workspace/output/'
-      sh """SSHPASS=${PASSWORD} sshpass -e sftp -o BatchMode=no -o StrictHostKeyChecking=no -b - ${USERNAME}@${params.SERVER_IP} << EOF
-get -r /tmp/${commitHash}/smpe-workspace/output/
-EOF"""
-            sh 'cd ../../'
-            sh 'pwd; ls -al;'
-            sh 'find ./smpe-workspace/output/ -print'
-            successful = true
-          } catch (ex1) {
-            // display errors
-            echo "${func}[error] in packaging: ${ex1}"
-            failure = ex1
-          }
-
-          try {
-            // clean up temporary files/folders
-            echo "${func} cleaning up ..."
-            sh "SSHPASS=${PASSWORD} sshpass -e ssh -tt -o StrictHostKeyChecking=no -p ${params.SERVER_PORT} ${USERNAME}@${params.SERVER_IP} \"rm -fr /tmp/${commitHash}\""
-          } catch (ex2) {
-            // ignore errors for cleaning up
-          }
-
-          if (failure) {
-            throw failure
-          }
-        }
-      }
-    }
-
-    stage('publish') {
-
-      //TODO // Upload AZWE001.pax.Z and AZWE001.readme.txt from zFS to artifactory into artifactory libs-snapshot-local/org/zowe/smpe/1.1.0/buildNoTimeStamp
-      echo 'publishing pax file to artifactory...'
-
-      def releaseIdentifier = getReleaseIdentifier()
-      def buildIdentifier = getBuildIdentifier(true, '__EXCLUDE__', true)
-      def buildName = env.JOB_NAME.replace('/', ' :: ')
-      echo "Artifactory build name/number: ${buildName}/${env.BUILD_NUMBER}"
-
-      // prepare build info
-      sh "jfrog rt bc '${buildName}' ${env.BUILD_NUMBER}"
-      // attach git information to build info
-      sh "jfrog rt bag '${buildName}' ${env.BUILD_NUMBER} ."
-      // upload and attach to build info
-
-      //TODO - inject build indentifier?
-      def uploadResult = sh(
-        script: "jfrog rt u 'smpe-workspace/output/AZWE001.pax.Z' smpe-workspace/output/AZWE001.readme.txt' --build-name=\"${buildName}\" --build-number=${env.BUILD_NUMBER} --flat",
-        returnStdout: true
-      ).trim()
-      echo "artifactory upload result:"
-      echo uploadResult
-      def uploadResultObject = readJSON(text: uploadResult)
-      if (uploadResultObject['status'] != 'success' ||
-          uploadResultObject['totals']['success'] != 1 || uploadResultObject['totals']['failure'] != 0) {
-        error "Failed on verifying upload result"
-      } else {
-        echo "upload result is successful as expected"
-      }
-      // add environment variables to build info
-      sh "jfrog rt bce '${buildName}' ${env.BUILD_NUMBER}"
-      // publish build info
-      sh "jfrog rt bp '${buildName}' ${env.BUILD_NUMBER} --build-url=${env.BUILD_URL}"
-    }
-
-    stage('done') {
-      // send out notification
-      emailext body: "Job \"${env.JOB_NAME}\" build #${env.BUILD_NUMBER} success.\n\nCheck detail: ${env.BUILD_URL}" ,
-          subject: "[Jenkins] Job \"${env.JOB_NAME}\" build #${env.BUILD_NUMBER} success",
-          recipientProviders: [
-            [$class: 'RequesterRecipientProvider'],
-            [$class: 'CulpritsRecipientProvider'],
-            [$class: 'DevelopersRecipientProvider'],
-            [$class: 'UpstreamComitterRecipientProvider']
-          ]
-    }
-
-  } catch (err) {
-    currentBuild.result = 'FAILURE'
-
-    // catch all failures to send out notification
-    emailext body: "Job \"${env.JOB_NAME}\" build #${env.BUILD_NUMBER} failed.\n\nError: ${err}\n\nCheck detail: ${env.BUILD_URL}" ,
-        subject: "[Jenkins] Job \"${env.JOB_NAME}\" build #${env.BUILD_NUMBER} failed",
-        recipientProviders: [
-          [$class: 'RequesterRecipientProvider'],
-          [$class: 'CulpritsRecipientProvider'],
-          [$class: 'DevelopersRecipientProvider'],
-          [$class: 'UpstreamComitterRecipientProvider']
-        ]
-
-    throw err
-  }
+  pipeline.end()
 }

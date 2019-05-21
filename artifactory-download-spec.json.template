@@ -1,12 +1,12 @@
 {
   "files": [{
       "pattern": "libs-release-local/org/zowe/1.1.0/zowe-1.1.0.pax",
-      "target": "smpe-workspace/smpe_input/zowe-1.1.0.pax",
+      "target": ".pax/zowe-1.1.0.pax",
       "flat": "true"
     },
     {
       "pattern": "libs-release-local/org/zowe/1.1.0/zowe-cli-package-1.1.0.zip",
-      "target": "smpe-workspace/smpe_input/zowe-cli-package-1.1.0.zip",
+      "target": ".pax/zowe-cli-package-1.1.0.zip",
       "flat": "true"
     }
   ]
