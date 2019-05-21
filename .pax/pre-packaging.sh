@@ -18,10 +18,18 @@ PWD=$(pwd)
 echo "$FUNC content of $PWD...."
 find . -print
 
+# find zowe pax
+ZOWE_PAX=$(ls -1 zowe-*.pax)
+if [ -z "${ZOWE_PAX}" ]; then
+  echo "Cannot find Zowe package."
+  exit 1
+fi
+echo "Zowe package is: ${ZOWE_PAX}"
+
 cd content
 
 # run test
 ./scripts/hello.sh
 
 # run smpe.sh
-./scripts/smpe.sh -?
+./scripts/smpe.sh -i "${PWD}/${ZOWE_PAX}" -v 110
