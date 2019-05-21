@@ -26,10 +26,5 @@ if [ -z "${ZOWE_PAX}" ]; then
 fi
 echo "Zowe package is: ${ZOWE_PAX}"
 
-cd content
-
-# run test
-./scripts/hello.sh
-
 # run smpe.sh
-./scripts/smpe.sh -i "${PWD}/${ZOWE_PAX}" -v 110
+./content/scripts/smpe.sh -i "${PWD}/${ZOWE_PAX}" -v 110
