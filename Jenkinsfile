@@ -48,7 +48,7 @@ node('ibm-jenkins-slave-nvm') {
   )
 
   // how we packaging jars/zips
-  pipeline.packaging(name: 'zowe-smpe')
+  pipeline.packaging(name: 'zowe-smpe', keepTempFolder: true)
 
   // define we need publish stage
   pipeline.publish(

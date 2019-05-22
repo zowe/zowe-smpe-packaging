@@ -32,7 +32,3 @@ chmod -R 755 content
 # prepare /bld
 echo "$FUNC bld is not part of smpe.pax, moving out ..."
 mv content/bld .
-
-# display extracted files
-echo "$FUNC content of $PWD after pre-packaging ...."
-find . -print
