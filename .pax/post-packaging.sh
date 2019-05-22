@@ -55,5 +55,5 @@ mkdir -p zowe
 #  -a "${PWD}/bld/_alter.sh" \
 ./bld/smpe.sh \
   -i "${PWD}/${INPUT_TXT}" \
-  -v 110 \
+  -v 120 \
   -r "${PWD}/zowe"
