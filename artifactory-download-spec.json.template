@@ -1,6 +1,6 @@
 {
   "files": [{
-      "pattern": "libs-snapshot-local/com/project/zowe/1.2.0-STAGINGS-CUPIDS/zowe-1.2.0-20190508.173923-4.pax",
+      "pattern": "libs-snapshot-local/com/project/zowe/1.2.0-STAGINGS-CUPIDS/zowe-1.2.0-20190523.154016-7.pax",
       "target": ".pax/zowe-1.2.0.pax",
       "flat": "true"
     },
