@@ -1,8 +1,11 @@
 {
   "files": [{
-      "pattern": "libs-snapshot-local/com/project/zowe/1.2.0-STAGINGS-CUPIDS/zowe-1.2.0-20190523.154016-7.pax",
+      "pattern": "libs-snapshot-local/com/project/zowe/1.2.0-STAGINGS-CUPIDS/zowe-1.*.pax",
       "target": ".pax/zowe-1.2.0.pax",
-      "flat": "true"
+      "flat": "true",
+      "sortBy": ["created"],
+      "sortOrder": "desc",
+      "limit": 1
     },
     {
       "pattern": "libs-release-local/org/zowe/1.2.0/zowe-cli-package-1.2.0.zip",
