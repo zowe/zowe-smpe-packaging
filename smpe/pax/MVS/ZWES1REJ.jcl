@@ -1,4 +1,4 @@
-//ZWE7APLY JOB <job parameters>
+//ZWES1REJ JOB <job parameters>
 //*
 //* This program and the accompanying materials are made available
 //* under the terms of the Eclipse Public License v2.0 which
@@ -11,8 +11,7 @@
 //*
 //********************************************************************
 //*
-//* This JCL will SMP/E APPLY product
-//* Zowe Open Source Project
+//* This JCL will remove a SYSMOD (PTF, APAR, USERMOD) from SMPPTS.
 //*
 //*
 //* CAUTION: This is neither a JCL procedure nor a complete job.
@@ -24,27 +23,20 @@
 //* 2) Change #csihlq to the high level qualifier for the global zone
 //*    of the CSI.
 //*
-//* 3) Change #tzone to your CSI target zone name.
-//*
-//* 4) Once the APPLY CHECK is successful, remove the CHECK operand
-//*    and run the job again to do the APPLY.
+//* 3) Change #sysmod to the name of the SYSMOD to be received.
 //*
 //* Note(s):
 //*
-//* 1. The REDO operand must be added to the APPLY command if the
-//*    product has been APPLYed previously.
-//*
-//* 2. This job should complete with a return code 0.
+//* 1. This job should complete with a return code 0.
 //*
 //********************************************************************
 //*
-//APPLY    EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
+//REJECT   EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
 //SMPCSI   DD DISP=OLD,DSN=#csihlq.CSI
-//SMPHOLD  DD DUMMY
 //SMPCNTL  DD *
-  SET BOUNDARY(#tzone) .
-  APPLY  SELECT([FMID])
-         BYPASS(HOLDSYS,HOLDUSER)
-         CHECK
-         COMPRESS(ALL) .
+   SET BOUNDARY(GLOBAL) .
+   REJECT BYPASS(APPLYCHECK)
+          SELECT(
+   #sysmod
+   ) .
 //*

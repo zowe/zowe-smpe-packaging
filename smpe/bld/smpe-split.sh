@@ -49,8 +49,8 @@ extAttr=extattr.txt            # product non-standard extattr bits
 dataSet=dataset.txt            # product data sets and members
 parts=parts.txt                # parts known by SMP/E
 partsDelta=parts-delta.txt     # delta of current and previous parts
-cfgScript=get-config.sh        # script to read smpe.yaml config data
 csiScript=get-dsn.rex          # catalog search interface (CSI) script
+cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
@@ -58,8 +58,7 @@ me=$(basename $0)              # script name
 #set -x                                                          #debug
 # more defaults defined later, search for "date="
 
-test "$debug" && echo
-test "$debug" && echo "> $me $@"
+test "$debug" && echo && echo "> $me $@"
 
 # ---------------------------------------------------------------------
 # --- split $stage into smaller directories that hold pax content
@@ -73,8 +72,7 @@ test "$debug" && echo "> $me $@"
 # ---------------------------------------------------------------------
 function _split
 {
-test "$debug" && echo
-test "$debug" && echo "> _split $@"
+test "$debug" && echo && echo "> _split $@"
 
 # count how many pax directories we created during previous run
 prevCnt=0
@@ -82,7 +80,7 @@ test -e $split && prevCnt=$(ls -D $split/ | wc -w | sed 's/ //g')
 test "$debug" && echo prevCnt=$prevCnt
 
 # start with a clean slate
-test -e $split && _cmd rm -rf $split
+test -e $split && _super rm -rf $split # previous run is owned by UID 0
 _cmd mkdir -p $split
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -155,8 +153,7 @@ test "$debug" && echo "< _split"
 # ---------------------------------------------------------------------
 function _move
 {
-test "$debug" && echo
-test "$debug" && echo "> _move $@"
+test "$debug" && echo && echo "> _move $@"
 
 unset DEL
 # delete directory after content move ?
@@ -201,8 +198,7 @@ test "$debug" && echo "< _move"
 # ---------------------------------------------------------------------
 function _manifest
 {
-test "$debug" && echo
-test "$debug" && echo "> _manifest"
+test "$debug" && echo && echo "> _manifest"
 
 echo "-- creating $log/$manifest"
 # track content in manifest
@@ -238,15 +234,15 @@ test "$debug" && echo
 test "$debug" && echo "for d in \$(find $stage -type d)"
 for d in $(find $stage -type d)
 do
+  # do not use _cmd to avoid flooding log in debug
   # SHORT: only keep useful part of dir (strip $stage, prefix with .)
   SHORT=.${d#$stage}
   # dir & symlink do not have extended attribs in ls -lE, add dummy
   # SED1: if pos 13-16 = '    ' then replace with '++++'
   SED1='s/^\(.\{12\}\)    \(.*\)$/\1++++\2/'
-  # SED2: only keep first char (filetype: -,d,l) of permission flags
-  #       and add 2 periods to the end (word 11 & 12 when no symlink)
-  SED2='s/\(.\).\{9\}\(.*\)/\1\2 \. \./'
-  # AWK: print only file type, extattr, file name, symlink, & size
+  # SED2: add 2 periods to the end (word 11 & 12 when no symlink)
+  SED2='s/$/ \. \./'
+  # AWK: print only attribs, extattr, file name, symlink, & size
   AWK='{if ($5 != "") printf("#USS %s %s '$SHORT'/%s %s %s %d\n" \
       ,$1,$2,$10,$11,$12,$6)}'
 
@@ -255,9 +251,9 @@ do
   test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                   # EXIT
 done    # for d
 # sample output:
-# #USS d ++++ ./mvs_explorer . . 8192
-# #USS - -ps- ./zlux-app-server/bin/zssServer . . 1978368
-# #USS l ++++ ./jes_explorer/server/node_modules/.bin/which -> ../which/bin/which 18
+# #USS drwxr-xr-x ++++ ./mvs_explorer . . 8192
+# #USS -rwxr-xr-x -ps- ./zlux-app-server/bin/zssServer . . 1978368
+# #USS lrwxrwxrwx ++++ ./jes_explorer/server/node_modules/.bin/which -> ../which/bin/which 18
 
 # append details in temporary manifest to actual manifest
 # (sorted by path name, which is the 4th field)
@@ -271,12 +267,14 @@ test "$debug" && echo
 test "$debug" && echo "for d in \$(ls -D $mvs)"
 for d in $(ls -D $mvs)
 do
+  # do not use _cmd to avoid flooding log in debug
   # AWK: print only file name & size, using same format as #USS
-  AWK='{if ($5 != "") printf("#MVS - ++++ '$d'(%s) . . %d\n",$9,$5)}'
+  AWK='{if ($5 != "") printf("#MVS ++++++++++ ++++ '$d'(%s) . . %d\n" \
+      ,$9,$5)}'
   ls -l $mvs/$d | awk "$AWK" 2>&1 >> $log/$manifest
 done    # for d
 # sample output:
-# #MVS - ++++ SZWEAUTH(ZWESIS01) . . 434176
+# #MVS ++++++++++ ++++ SZWEAUTH(ZWESIS01) . . 434176
 
 test "$debug" && echo "< _manifest"
 }    # _manifest
@@ -286,8 +284,7 @@ test "$debug" && echo "< _manifest"
 # ---------------------------------------------------------------------
 function _delta
 {
-test "$debug" && echo
-test "$debug" && echo "> _delta $@"
+test "$debug" && echo && echo "> _delta $@"
 
 dHist=$log/$deltaHist                  # make fully qualified file name
 dNow=$log/$delta                       # make fully qualified file name
@@ -376,8 +373,7 @@ test "$debug" && echo "< _delta"
 # ---------------------------------------------------------------------
 function _snapshot
 {
-test "$debug" && echo
-test "$debug" && echo "> _snapshot $@"
+test "$debug" && echo && echo "> _snapshot $@"
 
 # create file size snapshot to assist with altering split-logic
 echo "-- creating $log/$fileSize"
@@ -386,8 +382,11 @@ test -f $log/$fileSize.tmp && _cmd rm -f $log/$fileSize.tmp
 #   .:
 #   total 62
 #   -rwxr-xr-x   1 owner    group       size date name
+test "$debug" && echo
+test "$debug" && echo "for f in \$(ls -DAR $stage ...)"
 for f in $(ls -DAR $stage | grep ":$" | sed 's/:$//')
 do
+  # do not use _cmd to avoid flooding log in debug
   # loop through all directories and show size of files
   # sed-1 adds / to the end for directories (first char is d)
   # awk prints size, path and filename if there is a size
@@ -405,6 +404,7 @@ done    # for f
 
 # sort largest -> smallest
 _cmd --repl $log/$fileSize sort -r $log/$fileSize.tmp
+_cmd rm -f $log/$fileSize.tmp
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -417,9 +417,12 @@ test -f $log/$treeSize && _cmd rm -f $log/$treeSize
 #   .:
 #   total 62
 #   -rwxr-xr-x   1 owner    group       size date name
+test "$debug" && echo
+test "$debug" && echo "for f in \$(ls -DAR $stage ...)"
 AWK='{if ($5 != "") cnt += $5} END {printf("%12d %s\n", cnt, dir)}'
 for f in $(ls -DAR $stage | grep ":$" | sed 's/:$//')
 do
+  # do not use _cmd to avoid flooding log in debug
   # loop through all directories and gather size of dir + subdirs
   ls -lRA $f \
     | awk "$AWK" dir=$f \
@@ -439,7 +442,11 @@ done    # for f
 # create symlink snapshot to assist with altering split-logic
 echo "-- creating $log/$symLink"
 test -f $log/$symLink && _cmd rm -f $log/$symLink
+_cmd touch $log/$symLink
+# test "find" first as null result causes ls showing current dir
 # sed replaces everything up to $stage (incl) with ., leaving symlink info
+test "$debug" && echo
+test "$debug" && echo "ls -l \$(find $stage -type l) ..."
 test "$(find $stage -type l)" &&
   ls -l $(find $stage -type l) | sed "s!.*$stage!.!" > $log/$symLink
 # cannot test $? as it is only of the last pipe command
@@ -449,18 +456,30 @@ test "$(find $stage -type l)" &&
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 # create extattr snapshot to assist with tracking special files
+#echo "-- creating $log/$extAttr"
+#test -f $log/$extAttr && _cmd rm -f $log/$extAttr
+## awk prints only extattr & path
+## sed trims common path to .
+#test "$(find $stage -ext a -o -ext p)" && \
+#  ls -E $(find $stage -ext a -o -ext p) \
+#    | awk '{print $2, $10}' \
+#    | sed "s!$stage!.!" \
+#    > $log/$extAttr
+## cannot test $? as it is only of the last pipe command
+## sample output:
+## -ps- ./zlux-app-server/bin/zssServer
 echo "-- creating $log/$extAttr"
-test -f $log/$extAttr && _cmd rm -f $log/$extAttr
-# awk prints only extattr & path
-# sed trims common path to .
-test "$(find $stage -ext a -o -ext p)" && \
-  ls -E $(find $stage -ext a -o -ext p) \
-    | awk '{print $2, $10}' \
-    | sed "s!$stage!.!" \
-    > $log/$extAttr
+test "$debug" && echo
+test "$debug" && echo "awk '/^#USS/ {print \$2,\$3,\$4}' $log/$manifest ..."
+# print permits, extrattr & file name of non-standard USS entries
+awk '/^#USS/ {print $2,$3,$4}' $log/$manifest \
+  | grep -v "^-rwxr-xr-x --s-" \
+  | grep -v "^drwxr-xr-x ++++" \
+  | grep -v "^lrwxrwxrwx ++++" \
+  > $log/$extAttr 
 # cannot test $? as it is only of the last pipe command
 # sample output:
-# -ps- ./zlux-app-server/bin/zssServer
+# -rwxr-xr-x -ps- ./zlux-app-server/bin/zssServer
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -501,8 +520,7 @@ test "$debug" && echo "< _snapshot"
 # ---------------------------------------------------------------------
 function _parts
 {
-test "$debug" && echo
-test "$debug" && echo "> _parts $@"
+test "$debug" && echo && echo "> _parts $@"
 
 echo "-- creating $log/$parts"
 
@@ -588,11 +606,59 @@ test "$debug" && echo "< _parts"
 # ---------------------------------------------------------------------
 # --- pax a whole staging directory
 # $1: directory to pax
+# 
+# TODO interpret $log/$extAttr and determine required pax option
+# $log/$extAttr interpretation
+# Example:
+# -rwxr-xr-x -ps- ./zlux-app-server/bin/zssServer
+# 
+# WORD 1 (-rwxr-xr-x)
+#
+# The first character identifies the file type:
+# -  Regular file
+# b  Block special file (not supported for USS)
+# c  Character special file
+# d  Directory
+# e  External link
+# l  Symbolic link
+# p  FIFO pipe
+# s  Socket file type
+# 
+# The next 9 characters are in three groups of 3; they describe the 
+# permissions on the file. 
+# The first group of 3 describes owner permissions; the second describes 
+# group permissions; the third describes other (or �world�) permissions. 
+# Characters that might appear are:
+# r  Permission to read the file.
+# w  Permission to write on the file.
+# x  Permission to execute the file or search the directory.
+# -  Attribute not set.
+# 
+# The following characters appear only in the execute permission (x) 
+# position of the output.
+# S  Same as s, except that the execute bit is turned off.
+# s  If in owner permissions section, the set-user-ID bit is on; if in 
+#    group permissions section, the set-group-ID bit is on.
+# T  Same as t, except that the execute bit is turned off.
+# t  The sticky bit is on.
+# 
+# The following character appears after the permissions if the file 
+# contains extended ACL entries:
+# +
+#
+# WORD 2 (-ps-)
+# 
+# Displays extended attributes for regular files:
+# a  Program runs APF-authorized if linked AC=1.
+# p  Program is considered program-controlled.
+# s  Program is enabled to run in a shared address space.
+# l  Program is loaded from the shared library region.
+# -  Attribute not set.
+# 
 # ---------------------------------------------------------------------
 function _pax
 {
-test "$debug" && echo
-test "$debug" && echo "> _pax $@"
+test "$debug" && echo && echo "> _pax $@"
 
 paxFile="$ussI/${1}"
 
@@ -622,8 +688,7 @@ test "$debug" && echo "< _pax"
 # ---------------------------------------------------------------------
 function _size
 {
-test "$debug" && echo
-test "$debug" && echo "> _size $@"
+test "$debug" && echo && echo "> _size $@"
 
 # sum size of all parts
 AWK='{ if ($5 != "") bytes += $5} END {printf "%d",bytes}'
@@ -673,8 +738,7 @@ test "$debug" && echo "< _size"
 # ---------------------------------------------------------------------
 function _stageMembers
 {
-test "$debug" && echo
-test "$debug" && echo "> _stageMembers $@"
+test "$debug" && echo && echo "> _stageMembers $@"
 
 # show everything in debug mode
 test "$debug" && $here/$csiScript -d "${mvsI}.**"
@@ -856,10 +920,6 @@ echo "-- output: $ussI"
 # copy all MVS parts to USS for reporting
 _stageMembers
 
-# set owner, & permissions for input to ensure consistency
-_super chown -R 0:0 $stage
-_super chmod -R 755 $stage
-
 # create packaging manifest
 _manifest
 # document delta with previous manifest
@@ -877,11 +937,13 @@ _cmd mkdir -p $ussI
 
 # loop through $split/* directories to
 # - add manifest
+# - set owner to mask build userid from customer
 # - create pax
 # - check size
 for d in $(ls $split)
 do
   _cmd cp $log/$manifest $split/$d/
+  _super chown -R 0:0 $split/$d
   _pax $d
   _size $paxFile
 done    # for d
@@ -892,7 +954,7 @@ _parts
 # we are done with these, clean up
 _cmd cd $here                         # make sure we are somewhere else
 _cmd rm -rf $stage
-_cmd rm -rf $split
+_super rm -rf $split                  # data in split is owned by UID 0
 _cmd rm -rf $mvs
 
 echo "-- completed $me 0"

@@ -25,15 +25,13 @@
 //* 1) Add the job parameters to meet your system requirements.
 //*
 //* 2) Change the string "#fsdsn" to the appropriate data set name
-//*    for the file system that will be created. This must be done
-//*    twice. Once in the SET DSN statement and once in the SYSIN DD
-//*    of the ZFSALLOC step.
+//*    for the file system that will be created. 
 //*
 //* 3) Change #fsvol to the volser for the file system,
 //*    if you choose not to use the default of letting your Automatic
 //*    Class Selection (ACS) routines decide which volume to use.
 //*    If you use #fsvol, also uncomment all references to it:
-//*    - VOLUME(#fsvol) in step ZFSALLOC
+//*    - VOLUMES(#fsvol) in step ZFSALLOC
 //*
 //* 4) Change the string "-PathPrefix-" to the appropriate
 //*    high level directory name with leading and trailing "/". For
@@ -50,7 +48,7 @@
 //*    the #dsprefix value will match the CSI high level qualifier.
 //*
 //* 5b) If you are running this job to install service after the
-//*    product has been APPLYed, the ZWEMOUNT EXEC will reside in
+//*    product has been APPLYed, the ZWEMKDIR EXEC will reside in
 //*    a target library.
 //*    - Uncomment the second SYSEXEC statement and comment out the
 //*      first one.
@@ -67,8 +65,10 @@
 //* 2. The directory specified by -PathPrefix- will be created by the
 //*    job if it does not exist.
 //*
-//* 3. The combined length of the text in single quotes (') of the
-//*    SET DSN and SET DIR statements may not exceed 82 characters.
+//* 3. If your complete path name (-PathPrefix-usr/lpp/zowe) extends
+//*    beyond JCL limits, you can split it over multiple lines. The
+//*    ZWEMKDIR REXX will strip leading and trailing blanks and 
+//*    combine all lines in DD ROOT into a single path name.
 //*
 //* 4. Ensure you execute this job with a userid that is UID 0, or
 //*    that is permitted to the 'BPX.SUPERUSER' profile in the
@@ -86,49 +86,53 @@
 //*       MODE(RDRW)                 /* can be MODE(READ) */
 //*       TYPE(ZFS) PARM('AGGRGROW') /* zFS, with extents */
 //*
-//* 7. This job should complete with a return code 0.
+//* 7. This job utilizes JCL variables inside inline text, which
+//*    requires z/OS 2.1 or higher. When using an older z/OS level,
+//*    - Comment out the EXPORT SYMLIST statement
+//*    - Remove ",SYMBOLS=JCLONLY" from the DD definitions that 
+//*      utilize inline JCL variables
+//*    - Replace the following variables with their actual value:
+//*      - step ZFSALLOC, DD SYSIN, variable &DSN
+//*
+//* 8. This job should complete with a return code 0.
 //*    If not, check the output, consult the z/OS UNIX System
 //*    Services Messages and Codes manual to correct the problem,
 //*    and resubmit this job.
 //*
 //********************************************************************
+//         EXPORT SYMLIST=(DSN)
 //*
 //         SET DSN='#fsdsn'
-//*                 ----+----1----+----2----+----3----+----4----+----5
-//         SET DIR='-PathPrefix-usr/lpp/zowe'
 //*
-//ZFSALLOC EXEC PGM=IDCAMS,REGION=0M
+//ZFSALLOC EXEC PGM=IDCAMS,REGION=0M,COND=(4,LT)
 //SYSPRINT DD SYSOUT=*
-//SYSIN    DD *
+//SYSIN    DD *,SYMBOLS=JCLONLY
    DEFINE CLUSTER( -
-     NAME(#fsdsn) -
-   /*VOLUME(#fsvol)*/ -
+     NAME(&DSN) -
+   /*VOLUMES(#fsvol)*/ -
      LINEAR -
-     TRACKS(12000 3000) -
+     TRACKS(9000 900) -
      SHAREOPTIONS(3) -
    )
 //*
-//ZFSFORMT EXEC PGM=IOEAGFMT,REGION=0M,COND=(0,LT,ZFSALLOC),
+//ZFSFORMT EXEC PGM=IOEAGFMT,REGION=0M,COND=(4,LT),
 //            PARM='-aggregate &DSN -compat'
 //*STEPLIB  DD DISP=SHR,DSN=IOE.SIOELMOD        before z/OS 1.13
 //*STEPLIB  DD DISP=SHR,DSN=SYS1.SIEALNKE       from z/OS 1.13
 //SYSPRINT DD SYSOUT=*
 //*
-//* MOUNT
-//*
-//EXIST    EXEC PGM=IKJEFT01,REGION=0M,COND=(4,LT),
-//            PARM='LISTDS ''&DSN'' HISTORY'
+//MOUNT    EXEC PGM=IKJEFT01,REGION=0M,COND=(4,LT),
+//            PARM='%ZWEMKDIR ROOT=ROOT MOUNT=&DSN AGGRGROW'
+//REPORT   DD SYSOUT=*
 //SYSTSPRT DD SYSOUT=*
 //SYSTSIN  DD DUMMY
-//*
-//MOUNT    EXEC PGM=IKJEFT1A,REGION=0M,COND=(4,LT,EXIST),
-//            PARM='%ZWEMOUNT &TYPE &DSN &DIR'
-//SYSTSPRT DD SYSOUT=*
-//SYSTSIN  DD DUMMY
+//ROOT     DD DATA,DLM=$$                        data can be multi-line
+  -PathPrefix-usr/lpp/zowe
+$$  
 //SYSEXEC  DD DISP=SHR,DSN=#dsprefix.[FMID].F1
 //*
 //*SYSEXEC  DD DISP=SHR,         use when requested for service install
 //*            UNIT=SYSALLDA,
-//*            VOL=SER=#tvol,
+//**            VOL=SER=#tvol,
 //*            DSN=#thlq.SZWESAMP
 //*

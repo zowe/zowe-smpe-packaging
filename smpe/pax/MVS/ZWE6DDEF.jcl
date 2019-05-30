@@ -38,13 +38,13 @@
 //*
 //* 7) If you opted in job ZWE3ALOC to use non-cataloged target
 //*    data sets;
-//*    a) Uncomment all VOLUME(#tvol) statements.
+//*    a) Uncomment all VOLUME(&TVOL) statements.
 //*    b) Change #tvol to the volser of the target volume,
 //*       as used in the ZWE3ALOC job.
 //*
 //* 8) If you opted in job ZWE3ALOC to use non-cataloged distribution
 //*    data sets;
-//*    a) Uncomment all VOLUME(#dvol) statements.
+//*    a) Uncomment all VOLUME(&DVOL) statements.
 //*    b) Change #dvol to the volser of the distribution volume,
 //*       as used in the ZWE3ALOC job.
 //*
@@ -64,7 +64,23 @@
 //*
 //* 3. Run only the steps that are applicable to your installation.
 //*
-//* 4. This job should complete with a return code 0.
+//* 4. This job utilizes JCL variables inside inline text, which
+//*    requires z/OS 2.1 or higher. When using an older z/OS level,
+//*    - Comment out the EXPORT SYMLIST statement
+//*    - Remove ",SYMBOLS=JCLONLY" from the DD definitions that
+//*      utilize inline JCL variables
+//*    - Replace the following variables with their actual value:
+//*      - step DDDEFTGT, DD SMPCNTL, variable &TZONE          
+//*      - step DDDEFTGT, DD SMPCNTL, variable &THLQ. (2 times)
+//*      - step DDDEFTGT, DD SMPCNTL, variable &TVOL (2 times) 
+//*      - step DDDEFTGT, DD SMPCNTL, variable &DHLQ. (3 times)
+//*      - step DDDEFTGT, DD SMPCNTL, variable &DVOL (3 times)
+//*      - step DDDEFDLB, DD SMPCNTL, variable &DZONE
+//*      - step DDDEFDLB, DD SMPCNTL, variable &DHLQ. (3 times)
+//*      - step DDDEFDLB, DD SMPCNTL, variable &DVOL (3 times)
+//*      - step DEFPATH, DD SMPCNTL, variable &TZONE
+//*
+//* 5. This job should complete with a return code 0.
 //*    If some or all of these DDDEF entries already exist, then the
 //*    job will complete with a return code 8.
 //*    You will have to examine the output and determine wether or
@@ -80,44 +96,54 @@
 //*    for the DEFPATH step.
 //*
 //********************************************************************
+//         EXPORT SYMLIST=(TZONE,DZONE,THLQ,DHLQ,TVOL,DVOL)
+//*
+//         SET CSIHLQ=#csihlq
+//         SET TZONE=#tzone
+//         SET DZONE=#dzone
+//         SET THLQ=#thlq
+//         SET DHLQ=#dhlq
+//         SET TVOL=#tvol
+//         SET DVOL=#dvol
 //*
 //* DDDEFs FOR TARGET ZONE
 //*
 //DDDEFTGT EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
-//SMPCSI   DD DISP=OLD,DSN=#csihlq.CSI
-//SMPCNTL  DD *
-  SET   BDY(#tzone) .
+//SMPCSI   DD DISP=OLD,DSN=&CSIHLQ..CSI
+//SMPCNTL  DD *,SYMBOLS=JCLONLY
+  SET   BDY(&TZONE) .
   UCLIN .
     ADD DDDEF (SZWEAUTH)
-        DATASET(#thlq.SZWEAUTH)
+        DATASET(&THLQ..SZWEAUTH)
         UNIT(SYSALLDA)
-     /* VOLUME(#tvol) */
+     /* VOLUME(&TVOL) */
         WAITFORDSN
         SHR .
     ADD DDDEF (SZWESAMP)
-        DATASET(#thlq.SZWESAMP)
+        DATASET(&THLQ..SZWESAMP)
         UNIT(SYSALLDA)
-     /* VOLUME(#tvol) */
+     /* VOLUME(&TVOL) */
         WAITFORDSN
         SHR .
     ADD DDDEF (SZWEZFS)
+     /* do NOT alter PATH, correction is done in step DEFPATH */
         PATH('/usr/lpp/zowe/SMPE/') .
     ADD DDDEF (AZWEAUTH)
-        DATASET(#dhlq.AZWEAUTH)
+        DATASET(&DHLQ..AZWEAUTH)
         UNIT(SYSALLDA)
-     /* VOLUME(#dvol) */
+     /* VOLUME(&DVOL) */
         WAITFORDSN
         SHR .
     ADD DDDEF (AZWESAMP)
-        DATASET(#dhlq.AZWESAMP)
+        DATASET(&DHLQ..AZWESAMP)
         UNIT(SYSALLDA)
-     /* VOLUME(#dvol) */
+     /* VOLUME(&DVOL) */
         WAITFORDSN
         SHR .
     ADD DDDEF (AZWEZFS)
-        DATASET(#dhlq.AZWEZFS)
+        DATASET(&DHLQ..AZWEZFS)
         UNIT(SYSALLDA)
-     /* VOLUME(#dvol) */
+     /* VOLUME(&DVOL) */
         WAITFORDSN
         SHR .
   ENDUCL .
@@ -125,26 +151,26 @@
 //* DDDEFs FOR DISTRIBUTION ZONE
 //*
 //DDDEFDLB EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
-//SMPCSI   DD DISP=OLD,DSN=#globalcsi
-//SMPCNTL  DD *
-  SET   BDY(#dzone) .
+//SMPCSI   DD DISP=OLD,DSN=&CSIHLQ..CSI
+//SMPCNTL  DD *,SYMBOLS=JCLONLY
+  SET   BDY(&DZONE) .
   UCLIN .
     ADD DDDEF (AZWEAUTH)
-        DATASET(#dhlq.AZWEAUTH)
+        DATASET(&DHLQ..AZWEAUTH)
         UNIT(SYSALLDA)
-     /* VOLUME(#dvol) */
+     /* VOLUME(&DVOL) */
         WAITFORDSN
         SHR .
     ADD DDDEF (AZWESAMP)
-        DATASET(#dhlq.AZWESAMP)
+        DATASET(&DHLQ..AZWESAMP)
         UNIT(SYSALLDA)
-     /* VOLUME(#dvol) */
+     /* VOLUME(&DVOL) */
         WAITFORDSN
         SHR .
     ADD DDDEF (AZWEZFS)
-        DATASET(#dhlq.AZWEZFS)
+        DATASET(&DHLQ..AZWEZFS)
         UNIT(SYSALLDA)
-     /* VOLUME(#dvol) */
+     /* VOLUME(&DVOL) */
         WAITFORDSN
         SHR .
   ENDUCL .
@@ -160,11 +186,11 @@
 //*  double slashes (such as //usr/lpp) prior to running this step.
 //*
 //DEFPATH  EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
-//SMPCSI   DD DISP=OLD,DSN=#globalcsi
-//SMPCNTL  DD *
-  SET BDY(#tzone) .         /* change -PathPrefix- */
-  ZONEEDIT DDDEF .
+//SMPCSI   DD DISP=OLD,DSN=&CSIHLQ..CSI
+//SMPCNTL  DD *,SYMBOLS=JCLONLY
+  SET BDY(&TZONE) .        /* do NOT change "PATH('/usr/lpp/zowe'*," */
+  ZONEEDIT DDDEF .         /* only change the 2nd (PathPrefix) line  */
     CHANGE PATH('/usr/lpp/zowe'*,
-                '-PathPrefix-usr/lpp/zowe'*) .
+     '-PathPrefix-usr/lpp/zowe'*) .
   ENDZONEEDIT .
 //*

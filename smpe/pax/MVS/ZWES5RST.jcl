@@ -1,4 +1,4 @@
-//ZWE7APLY JOB <job parameters>
+//ZWES5RST JOB <job parameters>
 //*
 //* This program and the accompanying materials are made available
 //* under the terms of the Eclipse Public License v2.0 which
@@ -11,8 +11,7 @@
 //*
 //********************************************************************
 //*
-//* This JCL will SMP/E APPLY product
-//* Zowe Open Source Project
+//* This JCL will RESTORE a service SYSMOD (PTF, APAR, USERMOD).
 //*
 //*
 //* CAUTION: This is neither a JCL procedure nor a complete job.
@@ -26,25 +25,25 @@
 //*
 //* 3) Change #tzone to your CSI target zone name.
 //*
-//* 4) Once the APPLY CHECK is successful, remove the CHECK operand
-//*    and run the job again to do the APPLY.
+//* 4) Change #sysmod to the name of the SYSMOD to be restored.
 //*
 //* Note(s):
 //*
-//* 1. The REDO operand must be added to the APPLY command if the
-//*    product has been APPLYed previously.
+//* 1. The RESTORE process will replace the affected elements in the
+//*    target libraries with the version from the distribution
+//*    libraries. This implies that you cannot RESTORE a SYSMOD once it
+//*    has been accepted. This also implies that you must RESTORE all
+//*    SYSMODS that have been applied since the last accepted SYSMOD.
 //*
 //* 2. This job should complete with a return code 0.
 //*
 //********************************************************************
 //*
-//APPLY    EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
+//ACEPTCHK EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
 //SMPCSI   DD DISP=OLD,DSN=#csihlq.CSI
-//SMPHOLD  DD DUMMY
 //SMPCNTL  DD *
-  SET BOUNDARY(#tzone) .
-  APPLY  SELECT([FMID])
-         BYPASS(HOLDSYS,HOLDUSER)
-         CHECK
-         COMPRESS(ALL) .
+   SET BOUNDARY(#tzone) .
+   RESTORE SELECT(
+   #sysmod
+   ) .
 //*

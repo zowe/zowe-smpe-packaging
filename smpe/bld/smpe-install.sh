@@ -53,24 +53,22 @@
 smpeFilter="/smpe"             # regex to find SMP/E archive name
 prodScript=install/zowe-install.sh  # product install script
 smpeScript=smpe-members.sh     # SMP/E-member install script
-cfgScript=get-config.sh        # script to read smpe.yaml config data
 csiScript=get-dsn.rex          # catalog search interface (CSI) script
+cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 #set -x                                                          #debug
 
-test "$debug" && echo
-test "$debug" && echo "> $me $@"
+test "$debug" && echo && echo "> $me $@"
 
 # ---------------------------------------------------------------------
 # --- find build output (input for install)
 # ---------------------------------------------------------------------
 function _findInput
 {
-test "$debug" && echo
-test "$debug" && echo "> _findInput $@"
+test "$debug" && echo && echo "> _findInput $@"
 
 # ensure that input names are initialy null
 unset in_pax in_other in_smpe
@@ -124,8 +122,7 @@ test "$debug" && echo "< _findInput"
 # ---------------------------------------------------------------------
 function _install
 {
-test "$debug" && echo
-test "$debug" && echo "> _install $@"
+test "$debug" && echo && echo "> _install $@"
 
 # explode pax file(s)
 for f in $in_pax
@@ -185,8 +182,7 @@ test "$debug" && echo "< _install"
 # ---------------------------------------------------------------------
 function _installSMPE
 {
-test "$debug" && echo
-test "$debug" && echo "> _installSMPE $@"
+test "$debug" && echo && echo "> _installSMPE $@"
 
 # explode pax file(s)
 for f in $in_smpe
@@ -246,8 +242,7 @@ test "$debug" && echo "< _installSMPE"
 # ---------------------------------------------------------------------
 function _installOther
 {
-test "$debug" && echo
-test "$debug" && echo "> _installOther $@"
+test "$debug" && echo && echo "> _installOther $@"
 
 # add remaining input files to installed product (stage directory)
 if test "$in_other" 
@@ -264,8 +259,7 @@ test "$debug" && echo "< _installOther"
 # ---------------------------------------------------------------------
 function _clearLog
 {
-test "$debug" && echo
-test "$debug" && echo "> _clearLog $@"
+test "$debug" && echo && echo "> _clearLog $@"
 
 # get names of all saved install logs except the last x
 echo "-- remove old install logs"
@@ -287,8 +281,7 @@ test "$debug" && echo "< _clearLog"
 # ---------------------------------------------------------------------
 function _explode
 {
-test "$debug" && echo
-test "$debug" && echo "> _explode $@"
+test "$debug" && echo && echo "> _explode $@"
 
 unset DEL
 # delete archive after explode ?
@@ -606,6 +599,9 @@ fi    #
 
 # ensure we can access everything
 _super chown -R $(id -u) $stage
+
+# set permissions to ensure consistency
+_cmd chmod -R 755 $stage
 
 # log dir exists if somebody used our input for install, trash it
 test -d $stage/log       && _cmd rm -rf $stage/log

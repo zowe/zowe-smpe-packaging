@@ -35,18 +35,17 @@ debug=0                                  /* assume not in debug mode */
 parse source . . ExecName . . . . ExecEnv .         /* get exec info */
 ExecName=substr(ExecName,lastpos('/',ExecName)+1)  /* $(basename $0) */
 
-/* process startup arguments */
-parse arg Args                              /* get startup arguments */
+/* get startup arguments */
+if word(arg(1),1) <> '-d'                         /* no debug mode ? */
+then parse arg Args                     /* get all startup arguments */
+else do
+  debug=1
+  parse arg . Args /* do not include the first (-d) startup argument */
+end    /* */
 /* process in two steps to have all startup args in 1 variable; Args */
 parse var Args Dsn Trash              /* split in multiple variables */
-if Dsn == '-d'                                       /* debug mode ? */
-then do
-  debug=1
-  parse var Trash Dsn Trash          /* pull Dsn from Trash variable */
-end    /* */
 
-if debug then say ''
-if debug then say '>' ExecName Args
+if debug then do; say ''; say '>' ExecName Args; end
 
 /* validate startup arguments */
 if Dsn == ''
@@ -71,11 +70,11 @@ if cRC == 0 then cRC=_readCatalog(Dsn,'A')
 if debug then say '<' ExecName cRC
 exit cRC                                            /* LEAVE PROGRAM */
 
-/*-------------------------------------------------------------------*/
-_displayUsage: PROCEDURE EXPOSE ExecName
-/*
+/*-------------------------------------------------------------------
  * --- display script usage information
+ * returns nothing
  */
+_displayUsage: PROCEDURE EXPOSE ExecName
 say ''
 say ' 'ExecName
 T=0
@@ -92,27 +91,28 @@ end    /* while T */
 say ''
 return    /* _displayUsage */
 
-/*-------------------------------------------------------------------*/
-_readCatalog: PROCEDURE EXPOSE debug
-/*
- * --- returns in variable CSIlist a list of data set names that match
- *     the filter
- *
- * Filter: limit catalog search to this mask (*, ** and % allowed)
- * Type  : (optional) up to 16 letters indicating which data set types 
- *         are acceptable (see dType variable for list)
- *         default allows all types
- * Vsam  : (optional) 'Y' to show DATA & INDEX of VSAM cluster
- *         default only shows cluster name
+/*-------------------------------------------------------------------
+ * --- displays data set names that match the filter
+ * retuns return code
+ * args:
+ *  Filter: limit catalog search to this mask (*, ** and % allowed)
+ *  Type  : (optional) up to 16 letters indicating which data set
+ *          types are acceptable (see dType variable for list)
+ *          default allows all types
+ *  Vsam  : (optional) 'Y' to show DATA & INDEX of VSAM cluster
+ *          default only shows cluster name
  *
  * user must be authorized to use this utility:
  * SYS1.LINKLIB(IGGCSI00) catalog search interface
  *
  * documentation in "DFSMS: Managing Catalogs (SC23-6853)"
  */
+_readCatalog: PROCEDURE EXPOSE debug
 parse upper arg Filter,Type,Vsam       /* get arguments in uppercase */
 if Type == '' then Type=' '         /* default: Type=' ' (allow all) */
 if Vsam == '' then Vsam=' '      /* default: Vsam=' ' (only cluster) */
+
+if debug then say '> _readCatalog' Filter','Type','Vsam
 
 /* initialize invocation variables ..................................*/
 Resume  ='Y'                                     /* prepare to loop  */
@@ -203,8 +203,11 @@ do while Resume = 'Y'
   then do                                   /* twice, we got to quit */
     say '** ERROR' dName 'cannot be processed with the work area',
         'provided, increase the work area size and retry'
-    return 8                                        /* LEAVE ROUTINE */
+    cRC=8
+    leave                                              /* LEAVE LOOP */
   end    /* error */
   PrevName=dName                          /* save for next iteration */
 end    /* do while */
+
+if debug then say '< _readCatalog' cRC
 return cRC      /* _readCatalog */

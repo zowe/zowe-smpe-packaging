@@ -1,4 +1,4 @@
-//ZWE7APLY JOB <job parameters>
+//ZWES2RCV JOB <job parameters>
 //*
 //* This program and the accompanying materials are made available
 //* under the terms of the Eclipse Public License v2.0 which
@@ -11,8 +11,7 @@
 //*
 //********************************************************************
 //*
-//* This JCL will SMP/E APPLY product
-//* Zowe Open Source Project
+//* This JCL will RECEIVE a service SYSMOD (PTF, APAR, USERMOD).
 //*
 //*
 //* CAUTION: This is neither a JCL procedure nor a complete job.
@@ -24,27 +23,28 @@
 //* 2) Change #csihlq to the high level qualifier for the global zone
 //*    of the CSI.
 //*
-//* 3) Change #tzone to your CSI target zone name.
+//* 3) Change #ptfhlq to the high level qualifier(s) of the data set
+//*    holding the sysmod to be received.
 //*
-//* 4) Once the APPLY CHECK is successful, remove the CHECK operand
-//*    and run the job again to do the APPLY.
+//* 4) Change #sysmod to the name of the SYSMOD to be received.
 //*
 //* Note(s):
 //*
-//* 1. The REDO operand must be added to the APPLY command if the
-//*    product has been APPLYed previously.
+//* 1. If you obtained additional HOLDDATA, Change NULLFILE in
+//*    DD SMPHOLD to the name of the data set holding the HOLDDATA.
 //*
 //* 2. This job should complete with a return code 0.
 //*
 //********************************************************************
 //*
-//APPLY    EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
+//         SET SYSMOD=#sysmod
+//         SET HLQ=#ptfhlq
+//*
+//RECEIVE  EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
 //SMPCSI   DD DISP=OLD,DSN=#csihlq.CSI
-//SMPHOLD  DD DUMMY
+//SMPHOLD  DD DISP=SHR,DSN=NULLFILE
+//SMPPTFIN DD DISP=SHR,DSN=&HLQ..&SYSMOD
 //SMPCNTL  DD *
-  SET BOUNDARY(#tzone) .
-  APPLY  SELECT([FMID])
-         BYPASS(HOLDSYS,HOLDUSER)
-         CHECK
-         COMPRESS(ALL) .
+   SET BOUNDARY(GLOBAL) .
+   RECEIVE SYSMODS LIST .
 //*

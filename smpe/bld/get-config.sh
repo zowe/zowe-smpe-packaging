@@ -49,8 +49,7 @@ me=get-config.sh               # no $(basename $0) with shell sharing
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 #set -x                                                          #debug
 
-test "$debug" && echo
-test "$debug" && echo "> $me $@"
+test "$debug" && echo && echo "> $me $@"
 
 # ---------------------------------------------------------------------
 # --- write configuration file
@@ -58,8 +57,7 @@ test "$debug" && echo "> $me $@"
 # ---------------------------------------------------------------------
 function _writeConfiguationFile
 {
-test "$debug" && echo
-test "$debug" && echo "> _writeConfiguationFile $@"
+test "$debug" && echo && echo "> _writeConfiguationFile $@"
 
 test "$debug" && echo
 test "$debug" && echo "cat <<EOF 2>&1 >$1"
@@ -88,8 +86,10 @@ install:
   extract=
   # semi-temporary directory where to install product
   stage=
-  # HLQ holding product data sets (= SMP/E input)
+  # HLQ holding product MVS data sets (= SMP/E input)
   outMVS=
+  # directory holding product USS files (= SMP/E input)
+  outUSS=
 split:
   # absolute maximum number of lines in a PTF
   ptfLines=
@@ -101,8 +101,22 @@ split:
   mvs=
   # temporary directory to split product in chunks
   split=
-  # directory holding product pax files (= SMP/E input)
-  outUSS=
+fmid:
+  # RELFILE & SMPMCS high level qualifier, must end with FMID name
+  mcsHlq=
+gimzip:
+  # high level qualifier for GIMZIP work files
+  gimzipHlq=
+  # directory holding SMP/E pax & readme (also used for staging)
+  gimzip=
+  # temporary directory holding config data & symlinks
+  scratch=
+  # Java home directory, for default, existing JAVA_HOME will be used if set
+  JAVA_HOME=
+  # SMP/ E home directory, for default, existing SMP_HOME will be used if set
+  SMP_HOME=
+  # IBM Developer for z Systems home directory, for default, existing IDZ_HOME will be used if set
+  IDZ_HOME=
 EOF
 # - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * -
 if test $? -ne 0
@@ -121,8 +135,7 @@ test "$debug" && echo "< _writeConfiguationFile $rc"
 # ---------------------------------------------------------------------
 function _parseConfiguationFile
 {
-test "$debug" && echo
-test "$debug" && echo "> _parseConfiguationFile $@"
+test "$debug" && echo && echo "> _parseConfiguationFile $@"
 
 unset section                # ensure we evaluate something we have set
 
@@ -155,14 +168,30 @@ do
     _export install log        log           ${ROOT}/log    # permanent
     _export install extract    extract       ${ROOT}/extract # internal
     _export install stage      stage         ${ROOT}/stage  # pass
-    _export install outMVS     mvsI          ${HLQ}.IN      # output
+    _export install outMVS     mvsI          ${HLQ}.BLD     # output
+    _export install outUSS     ussI          ${ROOT}/BLD    # output
 # split
     _export split   ptfLines   maxPtfLines   5000000        # permanent
     _export split   ptfPercent maxPtfPercent 90             # permanent
     _export split   deltaLines maxDeltaLines 30000          # permanent
     _export split   mvs        mvs           ${ROOT}/mvs    # internal
     _export split   split      split         ${ROOT}/split  # internal
-    _export split   outUSS     ussI          ${ROOT}/pax    # output
+# fmid
+    _export fmid    mcsHlq     mcsHlq        ${HLQ}         # output
+# gimzip
+    _export gimzip  gimzipHlq  gimzipHlq     ${HLQ}.GIMZIP  # internal  
+    _export gimzip  gimzip     gimzip        ${ROOT}/gimzip # output    
+    _export gimzip  scratch    scratch       \
+              $(echo ${ROOT}/work | tr [:lower:] [:upper:]) # internal
+    _export gimzip  JAVA_HOME  JAVA_HOME     \
+              ${JAVA_HOME:-$(find /usr/lpp/java -type d -level 0 \
+                             | grep /J.*[^_64]$ | tail -1)} # permanent
+    _export gimzip  SMP_HOME   SMP_HOME      \
+                                  ${SMP_HOME:-/usr/lpp/smp} # permanent
+    _export gimzip  IDZ_HOME   IDZ_HOME      \
+                              ${IDZ_HOME:-/usr/lpp/IBM/idz} # permanent
+# pd
+# service
 # - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * -
 
   fi    # process key=value

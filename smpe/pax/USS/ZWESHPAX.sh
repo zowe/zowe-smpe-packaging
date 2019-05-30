@@ -173,10 +173,10 @@ echo "-- Exploding $total entries"
 # pax
 #  -f "$pax_file"      pax file
 #  -r                  read (extract)
-#  -pe                 process extended attributes
+#  -px                 process extended attributes
 #  -v                  verbose
 #
-_cmdrc pax -f "$pax_file" -r -pe -v
+_cmdrc pax -f "$pax_file" -r -px -v
  
 #
 # count all files, directories & links currently present

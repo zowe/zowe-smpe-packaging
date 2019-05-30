@@ -10,26 +10,13 @@
 # 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
-#% (Re)Create Zowe SMP/E packaging configuration file.
+#% create program directory for base FMID (++FUNCTION)
 #%
-#% Invocation arguments:
-#% -?            show this help message
-#% -c smpe.yaml  use the specified config file
-#% -d            enable debug messages
-#% -h hlq        use the specified high level qualifier
-#%               .$FMID is automatically added
-#%               ignored when -c is specified
-#% -r rootDir    use the specified root directory
-#%               /$FMID is automatically added
-#%               ignored when -c is specified
-#% -v vrm        FMID 3-character version/release/modification
-#%               ignored when -c is specified
-#% -1 fmidChar1  first FMID character
-#%               ignored when -c is specified
-#% -2 fmidId     FMID 3-character ID code (position 2-4)
-#%               ignored when -c is specified
+#% -?                 show this help message
+#% -c smpe.yaml       use the specified config file
+#% -d                 enable debug messages
 #%
-#% either -c or -v is required
+#% -c is required
 
 cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
@@ -96,31 +83,26 @@ echo " "
 # --- main --- main --- main --- main --- main --- main --- main ---
 # ---------------------------------------------------------------------
 function main { }     # dummy function to simplify program flow parsing
-echo
-echo "-- $me -- $(sysvar SYSNAME) -- $(date)"
-echo "-- startup arguments: $@"
 
 # misc setup
-export _EDC_ADD_ERRNO2=1                        # show details on error
+_EDC_ADD_ERRNO2=1                               # show details on error
 unset ENV             # just in case, as it can cause unexpected output
 _cmd umask 0022                                  # similar to chmod 755
+
+echo; echo "-- $me - start $(date)"
+echo "-- startup arguments: $@"
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 # clear input variables
-unset YAML HLQ ROOT VRM fmid1 fmid2
+unset YAML in
 # do NOT unset debug
 
 # get startup arguments
-while getopts c:h:r:v:1:2:?d opt
+while getopts c:i:?d opt
 do case "$opt" in
-  c)   export YAML="$OPTARG";;
-  d)   export debug="-d";;
-  h)   export HLQ="$OPTARG";;
-  r)   export ROOT="$OPTARG";;
-  v)   export VRM="$OPTARG";;
-  1)   export fmid1="$OPTARG";;
-  2)   export fmid2="$OPTARG";;
+  c)   YAML="$OPTARG";;
+  d)   debug="-d";;
   [?]) _displayUsage
        test $opt = '?' || echo "** ERROR faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
@@ -129,7 +111,7 @@ done    # getopts
 shift $OPTIND-1
 
 # set envvars
-. $here/$cfgScript -c -v                      # call with shell sharing
+. $here/$cfgScript -c                         # call with shell sharing
 if test $rc -ne 0 
 then 
   # error details already reported
@@ -137,17 +119,8 @@ then
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 fi    #
 
-# now we are sure $YAML is defined, delete the config file ...
-test -e "$YAML" && _cmd rm -f $YAML
-# ... and create with latest defaults/overrides
-. $here/$cfgScript -c -v                      # call with shell sharing
-if test $rc -ne 0 
-then 
-  # error details already reported
-  echo "** ERROR $me '. $here/$cfgScript' ended with status $rc"
-  test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
-fi    #
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 echo "-- completed $me 0"
 test "$debug" && echo "< $me 0"
-exit 0
+exit 0                                                           # EXIT

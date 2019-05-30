@@ -55,30 +55,40 @@
 //* 1. Ensure that -PathPrefix- is an absolute path name and begins
 //*    and ends with a slash (/).
 //*
-//* 2. Ensure the directory specified by -PathPrefix- exists prior
-//*    to running this job.
+//* 2. The directory specified by -PathPrefix- will be created by the
+//*    job if it does not exist.
 //*
-//* 3. Ensure you execute this job with a userid that is UID 0, or
+//* 3. If your complete path name (-PathPrefix-usr/lpp/zowe) extends
+//*    beyond JCL limits, you can split it over multiple lines. The
+//*    ZWEMKDIR REXX will strip leading and trailing blanks and
+//*    combine all lines in DD ROOT into a single path name.
+//*
+//* 4. Ensure you execute this job with a userid that is UID 0, or
 //*    that is permitted to the 'BPX.SUPERUSER' profile in the
 //*    FACILITY security class.
 //*
-//* 4. This job should complete with a return code 0.
+//* 5. This job should complete with a return code 0.
 //*    If not, check the output, consult the z/OS UNIX System
 //*    Services Messages and Codes manual to correct the problem,
 //*    and resubmit this job.
 //*
 //********************************************************************
 //*
-//MKDIR    EXEC PGM=IKJEFT1A,REGION=0M,COND=(4,LT)
+//MKDIR    EXEC PGM=IKJEFT01,REGION=0M,COND=(4,LT),
+//            PARM='%ZWEMKDIR ROOT=ROOT DIRS=DIRS'
+//REPORT   DD SYSOUT=*
 //SYSTSPRT DD SYSOUT=*
-//SYSTSIN  DD *
-PROFILE MSGID
-ZWEMKDIR -PathPrefix-
-//*
+//SYSTSIN  DD DUMMY
+//ROOT     DD DATA,DLM=$$                        data can be multi-line
+  -PathPrefix-usr/lpp/zowe
+$$
+//DIRS     DD *
+  # do NOT change these definitions
+  SMPE
 //SYSEXEC  DD DISP=SHR,DSN=#dsprefix.[FMID].F1
 //*
 //*SYSEXEC  DD DISP=SHR,         use when requested for service install
 //*            UNIT=SYSALLDA,
-//*            VOL=SER=#tvol,
+//**            VOL=SER=#tvol,
 //*            DSN=#thlq.SZWESAMP
 //*

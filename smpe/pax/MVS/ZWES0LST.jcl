@@ -1,4 +1,4 @@
-//ZWE2RCVE JOB <job parameters>
+//ZWES0LST JOB <job parameters>
 //*
 //* This program and the accompanying materials are made available
 //* under the terms of the Eclipse Public License v2.0 which
@@ -11,8 +11,7 @@
 //*
 //********************************************************************
 //*
-//* This JCL will SMP/E RECEIVE product
-//* Zowe Open Source Project
+//* This JCL will list all SYSMODs for a given zone.
 //*
 //*
 //* CAUTION: This is neither a JCL procedure nor a complete job.
@@ -24,42 +23,37 @@
 //* 2) Change #csihlq to the high level qualifier for the global zone
 //*    of the CSI.
 //*
-//* 3) Change #hlq to the high level qualifier(s) of the SMPMCS and
-//*    REL files, as specified when uploading the files to the host
-//*    (as described in the program directory).
+//* 3) Change #tzone to your CSI target zone name.
+//*
+//* 4) Change #dzone to your CSI distribution zone name.
+//*
+//* 5) Uncomment the desired SET ZONE= statement and comment out
+//*    the other ones. The name of the SET statement (ACCEPT, APPLY, 
+//*    RECEIVE) indicates what type of information is in that zone.
 //*
 //* Note(s):
 //*
-//* 1. If #hlq is blank you must remove the RFPREFIX operand.
-//*
-//* 2. SMP/E makes copies of the relfiles and uses these as input.
-//*    Uncomment and customize DD SMPTLIB if you want to place these
-//*    copies on a specific volume.
-//*
-//* 3. This job utilizes JCL variables inside inline text, which
+//* 1. This job utilizes JCL variables inside inline text, which
 //*    requires z/OS 2.1 or higher. When using an older z/OS level,
 //*    - Comment out the EXPORT SYMLIST statement
 //*    - Remove ",SYMBOLS=JCLONLY" from the DD definitions that 
 //*      utilize inline JCL variables
 //*    - Replace the following variables with their actual value:
-//*      - step RECEIVE, DD SMPCNTL, variable &HLQ
+//*      - step LIST, DD SMPCNTL, variable &ZONE
 //*
-//* 4. This job should complete with a return code 0.
+//* 2. This job should complete with a return code 0.
 //*
 //********************************************************************
-//         EXPORT SYMLIST=(HLQ)
+//         EXPORT SYMLIST=(ZONE)
 //*
-//         SET HLQ=#hlq
+//*ACCEPT   SET ZONE=#dzone
+//*APPLY    SET ZONE=#tzone
+//RECEIVE  SET ZONE=GLOBAL
 //*
-//RECEIVE  EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
+//LIST     EXEC PGM=GIMSMP,REGION=0M,COND=(4,LT)
 //SMPCSI   DD DISP=OLD,DSN=#csihlq.CSI
-//*SMPTLIB  DD UNIT=SYSALLDA,SPACE=(TRK,(1,1)),VOL=SER=#csivol
-//SMPHOLD  DD DUMMY
-//SMPPTFIN DD DISP=SHR,DSN=&HLQ..[FMID].SMPMCS
 //SMPCNTL  DD *,SYMBOLS=JCLONLY
-   SET BOUNDARY(GLOBAL) .
-   RECEIVE SELECT([FMID])
-           SYSMODS
-           RFPREFIX(&HLQ)
-           LIST .
+   SET BOUNDARY(&ZONE) .
+   LIST FUNCTIONS PTF APAR USERMOD
+   .
 //*

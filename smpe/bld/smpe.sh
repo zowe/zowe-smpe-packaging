@@ -37,11 +37,16 @@
 #% -i is always required
 #%
 #% caller needs these RACF permits:
-#% (smpe-install.sh smpe-split.sh)
+#% (smpe-install.sh smpe-split.sh smpe-gimzip.sh)
 #% TSO PE BPX.SUPERUSER        CL(FACILITY) ACCESS(READ) ID(userid)
 #% (zowe-install-zlux.sh)
 #% TSO PE BPX.FILEATTR.PROGCTL CL(FACILITY) ACCESS(READ) ID(userid)
+#% (smpe-gimzip.sh)
+#% TSO PE GIM.PGM.GIMZIP       CL(FACILITY) ACCESS(READ) ID(userid)
 #% TSO SETR RACLIST(FACILITY) REFRESH
+#%
+#% relies on:
+#% (smpe-gimzip.sh) IBM Developer for z Systems
 
 # see smpe-install.sh for info on -a, -f, -i
 
@@ -52,8 +57,7 @@ me=$(basename $0)              # script name
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 #set -x                                                          #debug
 
-test "$debug" && echo
-test "$debug" && echo "> $me $@"
+test "$debug" && echo && echo "> $me $@"
 
 # ---------------------------------------------------------------------
 # --- stop script if specified sub-script is about to start
@@ -62,8 +66,7 @@ test "$debug" && echo "> $me $@"
 # ---------------------------------------------------------------------
 function _stopAt
 {
-test "$debug" && echo
-test "$debug" && echo "> _stopAt $@"
+test "$debug" && echo && echo "> _stopAt $@"
 
 if test "$stopAt" = "$1"
 then
@@ -195,7 +198,8 @@ test "$count" && opts="$opts -f $count"              # add sanity check
 _stopAt smpe-install.sh $debug -c $YAML $opts
 _cmd $here/smpe-install.sh $debug -c $YAML $opts
 # result (intermediate): $stage                              # USS data
-# result (final): $mvsI                                      # MVS data
+# result (final): $mvsI                           # MVS & MVS SMPE data
+# result (final): $ussI                                 # USS SMPE data
 
 # split installed product in smaller chunks and pax them
 opts="-i $input"                                   # add reference file
@@ -203,7 +207,29 @@ _stopAt smpe-split.sh $debug -c $YAML $opts
 _cmd $here/smpe-split.sh $debug -c $YAML $opts
 # result (final): $ussI                                      # pax data
 
-# TODO if PTF then build ++PTF otherwise build ++FUNCTION
+# create FMID (++FUNCTION)
+opts=""
+_stopAt smpe-fmid.sh $debug -c $YAML $opts
+_cmd $here/smpe-fmid.sh $debug -c $YAML $opts
+# result (final): $HLQ                             # rel-files & SMPMCS
+
+# create GIMZIP
+opts=""
+_stopAt smpe-gimzip.sh $debug -c $YAML $opts
+_cmd $here/smpe-gimzip.sh $debug -c $YAML $opts
+# result (final): $gimzip                           # SMPE pax & readme
+
+# create program directory
+opts=""
+_stopAt smpe-pd.sh $debug -c $YAML $opts
+_cmd $here/smpe-pd.sh $debug -c $YAML $opts
+# result (final): $                                          # 
+
+# create service (++PTF)
+opts=""
+_stopAt smpe-service.sh $debug -c $YAML $opts
+_cmd $here/smpe-service.sh $debug -c $YAML $opts
+# result (final): $HLQ                                         # sysmod
 
 echo "-- completed $me 0"
 test "$debug" && echo "< $me 0"

@@ -21,31 +21,27 @@
 #%
 #% -c & -s are required
 
-mlq=                           # output to $mvsI.$mlq.$llq
-cfgScript=get-config.sh        # script to read smpe.yaml config data
 allocScript=scripts/allocate-dataset.sh  # script to allocate data set
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 #set -x                                                          #debug
 
-test "$debug" && echo
-test "$debug" && echo "> $me $@"
+test "$debug" && echo && echo "> $me $@"
 
 # ---------------------------------------------------------------------
-# ---
+# --- copy & customize files defined in $list to specified data set
 # $1: data set low level qualifier
 # $2: record format; {FB | U | VB}
 # $3: logical record length, use ** for RECFM(U)
 # $4: data set organisation; {PO | PS}
 # $5: space in tracks; primary[,secondary]
 # ---------------------------------------------------------------------
-function _install
+function _installMVS
 {
-test "$debug" && echo
-test "$debug" && echo "> _install $@"
+test "$debug" && echo && echo "> _installMVS $@"
 
-dsn="${mvsI}${mlq}.$1"
+dsn="${mvsI}.$1"
 
 # validate/create target data set
 $here/$allocScript $dsn "$2" "$3" "$4" "$5"
@@ -86,8 +82,46 @@ else
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 fi    #
 
-test "$debug" && echo "< _install"
-}    # _install
+test "$debug" && echo "< _installMVS"
+}    # _installMVS
+
+# ---------------------------------------------------------------------
+# --- copy & customize files defined in $list to specified path
+# $1: target path
+# ---------------------------------------------------------------------
+function _installUSS
+{
+test "$debug" && echo && echo "> _installUSS $@"
+
+# create output directory
+_cmd mkdir -p $1
+
+for file in $list
+do
+  test "$debug" && echo file=$file
+  if test ! -f "$file" -o ! -r "$file"
+  then
+    echo "** ERROR $me cannot access $file"
+    echo "ls -ld \"$file\""; ls -ld "$file"
+    test ! "$IgNoRe_ErRoR" && exit 8                             # EXIT
+  fi    #
+
+  # customize the file
+  _cmd --repl $file.new sed \
+    "s/\[FMID\]/$FMID/g;s/\[YEAR\]/$year/g" \
+    $file
+
+  # move the customized file
+  fileName=$(basename $file)
+  test "$LOG_FILE" && echo "  Copy $file to $1/$fileName" >> $LOG_FILE
+  _cmd mv $file.new $1/$fileName
+
+  # remove install source if requested
+  test "$ReMoVe" && _cmd rm -f $file
+done    # for file
+
+test "$debug" && echo "< _installUSS"
+}    # _installUSS
 
 # ---------------------------------------------------------------------
 # --- show & execute command, and bail with message on error
@@ -158,7 +192,7 @@ echo "-- startup arguments: $@"
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 # clear input variables
-unset YAML LOG_FILE ReMoVe cfgScriptDir
+unset YAML LOG_FILE ReMoVe cfgScript
 # do NOT unset debug
 
 # get startup arguments
@@ -168,7 +202,7 @@ do case "$opt" in
   d)   export debug="-d";;
   f)   export LOG_FILE="$OPTARG";;
   R)   ReMoVe="-R";;
-  s)   cfgScriptDir="$OPTARG";;
+  s)   cfgScript="$OPTARG";;
   [?]) _displayUsage
        test $opt = '?' || echo "** ERROR faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
@@ -176,19 +210,19 @@ do case "$opt" in
 done    # getopts
 shift $OPTIND-1
 
-if test ! -x "$cfgScriptDir"
+if test ! -x "$cfgScript"
 then
   _displayUsage
-  echo "** ERROR $me -s $cfgScriptDir is not executable"
+  echo "** ERROR $me -s $cfgScript is not executable"
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 fi    #
 
 # set envvars
-. $cfgScriptDir/$cfgScript -c                 # call with shell sharing
-if test $rc -ne 0 
-then 
+. $cfgScript -c                               # call with shell sharing
+if test $rc -ne 0
+then
   # error details already reported
-  echo "** ERROR $me '. $cfgScriptDir/$cfgScript' ended with status $rc"
+  echo "** ERROR $me '. $cfgScript' ended with status $rc"
   test ! "$IgNoRe_ErRoR" && exit 8                             # EXIT
 fi    #
 
@@ -199,18 +233,13 @@ test "$LOG_FILE" && echo "  $(date)" >> $LOG_FILE
 
 _cmd cd $here
 
-test "$mlq" && mlq=$(echo $mlq | tr [:lower:] [:upper:])
-# mlq='' -> '', mlq<>'' -> leading ., no trailing .
-test "$(echo $mlq | grep -v ^[.])" && mlq=".$mlq"     # add leading dot
-mlq=$(echo $mlq | sed 's/\(.*\)[.]$/\1/')           # trim trailing dot
-test "$debug" && mlq=$mlq
-
 year=$(date '+%Y')                                               # yyyy
 test "$debug" && year=$year
 
 # show input/output details
-echo "-- input:  $here"
-echo "-- output: $mvsI"
+echo "-- input:      $here"
+echo "-- output MVS: $mvsI"
+echo "-- output USS: $ussI"
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -225,16 +254,18 @@ list="$list MVS/ZWE6DDEF.jcl"
 list="$list MVS/ZWE7APLY.jcl"
 list="$list MVS/ZWE8ACPT.jcl"
 list="$list MVS/ZWEMKDIR.rex"
-list="$list MVS/ZWEMOUNT.rex"
-_install SZWESAMP "FB" "80" "PO" "10,2"
+list="$list MVS/ZWES0LST.jcl"
+list="$list MVS/ZWES1REJ.jcl"
+list="$list MVS/ZWES2RCV.jcl"
+list="$list MVS/ZWES3APL.jcl"
+list="$list MVS/ZWES4ACP.jcl"
+list="$list MVS/ZWES5RST.jcl"
+_installMVS SZWESAMP "FB" "80" "PO" "10,2"
 
 # install SZWEZFS members
 list=""     # file names include path based on $here
 list="$list USS/ZWESHPAX.sh"
-# half-track on 3390 DASD is 27998 bytes
-# record length 6999 fits 4 records per half-track, with 2 bytes left
-# subtract 4 for variable record length field gives LRECL(6995)
-_install SZWEZFS "VB" "6995" "PO" "10,2"
+_installUSS $ussI
 
 # remove install script if requested
 test "$ReMoVe" && _cmd rm -f $0

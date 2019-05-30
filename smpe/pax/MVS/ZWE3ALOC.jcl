@@ -137,11 +137,15 @@
 //*  exist with proper allocations.
 //*
 //ALLOCT   EXEC ALLOCT,       * Allocate Target Libraries
+//*                        1         2         3
+//*               12345678901234567890123456789012345
 //            HLQ=#thlq,
 //            TVOL=#tvol,
 //            DSP=CATLG
 //*
 //ALLOCD   EXEC ALLOCD,       * Allocate Distribution Libraries
+//*                        1         2         3
+//*               12345678901234567890123456789012345
 //            HLQ=#dhlq,
 //            DVOL=#dvol,
 //            DSP=CATLG
