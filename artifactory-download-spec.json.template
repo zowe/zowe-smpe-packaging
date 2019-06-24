@@ -1,16 +1,19 @@
 {
   "files": [{
-      "pattern": "libs-snapshot-local/com/project/zowe/1.2.0-STAGINGS-CUPIDS/zowe-1.*.pax",
-      "target": ".pax/zowe-1.2.0.pax",
+      "pattern": "libs-snapshot-local/org/zowe/1.3.0-STAGINGS-CUPIDS/zowe-1.*.pax",
+      "target": ".pax/zowe-1.3.0.pax",
       "flat": "true",
       "sortBy": ["created"],
       "sortOrder": "desc",
       "limit": 1
     },
     {
-      "pattern": "libs-release-local/org/zowe/1.2.0/zowe-cli-package-1.2.0.zip",
-      "target": ".pax/zowe-cli-package-1.2.0.zip",
-      "flat": "true"
+      "pattern": "libs-release-local/org/zowe/1.3.*/zowe-cli-package-1.3.*.zip",
+      "target": ".pax/zowe-cli-package-1.3.*.zip",
+      "flat": "true",
+      "sortBy": ["created"],
+      "sortOrder": "desc",
+      "limit": 1
     }
   ]
 }
