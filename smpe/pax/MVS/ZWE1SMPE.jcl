@@ -7,7 +7,7 @@
 //*
 //* SPDX-License-Identifier: EPL-2.0
 //*
-//* 5698-ZWE Copyright Contributors to the Zowe Project. 2019, [YEAR]
+//* Copyright Contributors to the Zowe Project. 2019, [YEAR]
 //*
 //*********************************************************************
 //*
@@ -37,6 +37,10 @@
 //*    - VOLUMES(&CSIVOL) in step DEFCSI
 //*    - VOL=SER=&CSIVOL in multiple DDs of step ZONING
 //*
+//* 6) This product can install in multiple SREL subsystems; 
+//*    Z038 (z/OS), P115 (IMS/DB2), and C150 (CICS). Update the
+//*    SET SREL= statement to select the desired SREL.
+//*
 //* Note(s):
 //*
 //* 1. JES3 configurations do not allow creation and usage of a
@@ -56,6 +60,7 @@
 //*    - Replace the following variables with their actual value:
 //*      - step DEFCSI, DD SYSIN, variable &CSIHLQ. (3 times)
 //*      - step DEFCSI, DD SYSIN, variable &CSIVOL
+//*      - step ZONING, DD SMPCNTL, variable &SREL. (3 times)
 //*      - step ZONING, DD SMPCNTL, variable &TZONE (4 times)
 //*      - step ZONING, DD SMPCNTL, variable &DZONE (4 times)
 //*      - step ZONING, DD SMPCNTL, variable &CSIHLQ. (2 times)
@@ -64,13 +69,14 @@
 //* 4. This job should complete with a return code 0.
 //*
 //*********************************************************************
-//         EXPORT SYMLIST=(CSIHLQ,CSIVOL,TZONE,DZONE,DSPREFIX)
+//         EXPORT SYMLIST=(CSIHLQ,CSIVOL,TZONE,DZONE,SREL,DSPREFIX)
 //*                            1         2         3
 //*                   12345678901234567890123456789012345
 //         SET CSIHLQ=#csihlq
 //         SET TZONE=#tzone
 //         SET DZONE=#dzone
 //         SET CSIVOL=#csivol
+//         SET SREL=Z038     # Z038 (z/OS), P115 (IMS/DB2), C150 (CICS)
 //*
 //         SET DSPREFIX=&CSIHLQ          # HLQ for SMP/E work data sets
 //*
@@ -206,7 +212,7 @@
   UCLIN.
     ADD GLOBALZONE              /* DEFINE GLOBAL ZONE NOW     */
         OPTIONS(ESAOPT)         /* DEFINE AN OPTIONS ENTRY    */
-        SREL(Z038)              /* MVS                        */
+        SREL(&SREL.)            /* z/OS, CICS, OR IMS/DB2     */
         ZONEINDEX(              /* ZONES TO BE SET UP         */
           (&TZONE,&CSIHLQ..CSI,TARGET),
           (&DZONE,&CSIHLQ..CSI,DLIB))
@@ -253,7 +259,7 @@
     ADD TARGETZONE(&TZONE)      /* DEFINE TARGET ZONE         */
         RELATED(&DZONE)         /* DISTRIBUTION LIBRARY       */
         OPTIONS(ESAOPT)         /* DEFINE AN OPTIONS ENTRY    */
-        SREL(Z038)              /* MVS                        */
+        SREL(&SREL.)            /* z/OS, CICS, OR IMS/DB2     */
         .                       /*                            */
     ADD DDDEF(SMPOUT)   SYSOUT(*) .
     ADD DDDEF(SMPRPT)   SYSOUT(*) .
@@ -284,7 +290,7 @@
     ADD DLIBZONE(&DZONE)        /* DEFINE DISTRIBUTION ZONE   */
         RELATED(&TZONE)         /* TARGET LIBRARY             */
         OPTIONS(ESAOPT)         /* DEFINE AN OPTIONS ENTRY    */
-        SREL(Z038)              /* MVS                        */
+        SREL(&SREL.)            /* z/OS, CICS, OR IMS/DB2     */
         .
     ADD DDDEF(SMPOUT)   SYSOUT(*) .
     ADD DDDEF(SMPRPT)   SYSOUT(*) .

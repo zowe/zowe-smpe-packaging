@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 #% package base FMID (++FUNCTION) for shipment in GIMZIP format
@@ -81,7 +81,7 @@ echo "-- invoking GIMZIP"
 
 if test ! -e "$CRASTART"
 then
-  echo "** ERROR cannot execute: $CRASTART"
+  echo "** ERROR $me cannot execute: $CRASTART"
   echo "ls -ld \"$CRASTART\""; ls -ld "$CRASTART"
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 fi    #
@@ -164,7 +164,7 @@ then                                       # CRASTART or GIMZIP failure
   cat $log/$sysprint
   echo "-- $smpout $(cat $log/$smpout | wc -l) line(s)"
   cat $log/$smpout
-  echo "** ERROR GIMZIP ended with a non-zero return code"
+  echo "** ERROR $me GIMZIP ended with a non-zero return code"
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 elif test "$debug"                                     # GIMZIP success
 then
@@ -182,17 +182,17 @@ test "$debug" && echo "< _gimzip"
 # GIMZIP sample:
 # <GIMZIP description="Zowe Open Source Project">
 # <FILEDEF type="SMPPTFIN" archid="SMPMCS"
-#          name="BLD.AZWE001.SMPMCS"/>
+#          name="BLD.ZOWE.AZWE001.SMPMCS"/>
 # <FILEDEF type="SMPRELF"  archid="AZWE001.F1"
-#          name="BLD.AZWE001.F1"/>
+#          name="BLD.ZOWE.AZWE001.F1"/>
 # </GIMZIP>
 #
 # GIMUNZIP sample:
 # <GIMUNZIP>
 # <ARCHDEF archid="SMPMCS"
-#          newname="@PREFIX@.AZWE001.SMPMCS"/>
+#          newname="@PREFIX@.ZOWE.AZWE001.SMPMCS"/>
 # <ARCHDEF archid="AZWE001.F1"
-#          newname="@PREFIX@.AZWE001.F1"/>
+#          newname="@PREFIX@.ZOWE.AZWE001.F1"/>
 # </GIMUNZIP>
 #
 # documentation in "SMP/E for z/OS Reference (SA23-2276)"
@@ -207,7 +207,7 @@ $here/$existScript $mcs
 # returns 0 for exist, 2 for not exist, 8 for error
 if test $rc -eq 2
 then
-  echo "** ERROR no data sets match '$mcs'"
+  echo "** ERROR $me no data sets match '$mcs'"
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 elif test $rc -gt 2
 then
@@ -225,7 +225,7 @@ datasets=$($here/$csiScript "$mask")
 rc=$?
 if test $rc -eq 1
 then
-  echo "** ERROR no data sets match '$mask'"
+  echo "** ERROR $me no data sets match '$mask'"
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 elif test $rc -gt 1
 then
@@ -236,7 +236,7 @@ fi    #
 # verify that all DSNs end in .F<number>
 if test "$(echo "$datasets" | grep -v \.F[[:digit:]]*$)"
 then
-  echo "** ERROR non-RELFILE data set in RELFILE list"
+  echo "** ERROR $me non-RELFILE data set in RELFILE list"
   echo "$datasets" | grep -v \.F[[:digit:]]*$
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 fi    #
@@ -255,7 +255,7 @@ _cmd --repl $scratch/$sysinGimunzip \
 _cmd --save $scratch/$sysinGimunzip \
   echo "<ARCHDEF archid=\"SMPMCS\""
 _cmd --save $scratch/$sysinGimunzip \
-  echo "         newname=\"@PREFIX@.${FMID}.SMPMCS\"/>"
+  echo "         newname=\"@PREFIX@.${RFDSNPFX}.${FMID}.SMPMCS\"/>"
 
 # add RELFILEs to SYSIN
 for dsn in $datasets
@@ -273,7 +273,7 @@ do
   _cmd --save $scratch/$sysinGimunzip \
   echo "<ARCHDEF archid=\"${FMID}.${dsn##*.}\""
   _cmd --save $scratch/$sysinGimunzip \
-  echo "         newname=\"@PREFIX@.${FMID}.${dsn##*.}\"/>"
+  echo "         newname=\"@PREFIX@.${RFDSNPFX}.${FMID}.${dsn##*.}\"/>"
 done    # for f
 
 # GIMZIP SYSIN footer
@@ -597,7 +597,7 @@ do case "$opt" in
   c)   YAML="$OPTARG";;
   d)   debug="-d";;
   [?]) _displayUsage
-       test $opt = '?' || echo "** ERROR faulty startup argument: $@"
+       test $opt = '?' || echo "** ERROR $me faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt
 done    # getopts
@@ -613,6 +613,8 @@ then
 fi    #
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+mcsHlq=${HLQ}.${RFDSNPFX}.${FMID}
 
 echo "-- input:  $mcsHlq"
 echo "-- output: $gimzip"

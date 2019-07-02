@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 #% create program directory for base FMID (++FUNCTION)
@@ -17,6 +17,11 @@
 #% -d                 enable debug messages
 #%
 #% -c is required
+
+# B2H - Convert BookMaster, GML, Script/VS and "flat" files to HTML
+# Gary L. Richtmeyer - Copyright 2001-2002 AT&T  
+# http://www.vm.ibm.com/download/packages/descript.cgi?b2h
+
 
 cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
@@ -104,7 +109,7 @@ do case "$opt" in
   c)   YAML="$OPTARG";;
   d)   debug="-d";;
   [?]) _displayUsage
-       test $opt = '?' || echo "** ERROR faulty startup argument: $@"
+       test $opt = '?' || echo "** ERROR $me faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt
 done    # getopts

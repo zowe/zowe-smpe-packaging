@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 #% Create SMP/E members.
@@ -21,7 +21,8 @@
 #%
 #% -c & -s are required
 
-allocScript=scripts/allocate-dataset.sh  # script to allocate data set
+allocScript=allocate-dataset.sh  # script to allocate data set
+here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
@@ -183,7 +184,6 @@ function main { }     # dummy function to simplify program flow parsing
 # misc setup
 _EDC_ADD_ERRNO2=1                               # show details on error
 unset ENV             # just in case, as it can cause unexpected output
-here=$(dirname $0)
 _cmd umask 0022                                  # similar to chmod 755
 
 echo; echo "-- $me - start $(date)"
@@ -204,7 +204,7 @@ do case "$opt" in
   R)   ReMoVe="-R";;
   s)   cfgScript="$OPTARG";;
   [?]) _displayUsage
-       test $opt = '?' || echo "** ERROR faulty startup argument: $@"
+       test $opt = '?' || echo "** ERROR $me faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt
 done    # getopts
@@ -225,6 +225,9 @@ then
   echo "** ERROR $me '. $cfgScript' ended with status $rc"
   test ! "$IgNoRe_ErRoR" && exit 8                             # EXIT
 fi    #
+
+scripts=$here/scripts
+test "$debug" && scripts=$scripts
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -269,7 +272,7 @@ _installUSS $ussI
 
 # remove install script if requested
 test "$ReMoVe" && _cmd rm -f $0
-test "$ReMoVe" && _cmd rm -rf $here/scripts
+test "$ReMoVe" && _cmd rm -rf $scripts
 
 echo "-- completed $me 0"
 test "$debug" && echo "< $me 0"

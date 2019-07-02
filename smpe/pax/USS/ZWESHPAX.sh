@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, [YEAR]
+# Copyright Contributors to the Zowe Project. 2019, [YEAR]
 #######################################################################
 
 # Explode or remove exploded output of a SMP/E-mananaged pax file
@@ -233,7 +233,7 @@ then
   # (= manifest not found in pax)
   #
   echo "** WARNING $SMP_File does not have a manifest"
-fi
+fi    #
  
 #
 # exit gracefully if manifest is no longer present in filesystem

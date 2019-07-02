@@ -7,7 +7,7 @@
 //*
 //* SPDX-License-Identifier: EPL-2.0
 //*
-//* 5698-ZWE Copyright Contributors to the Zowe Project. 2019, [YEAR]
+//* Copyright Contributors to the Zowe Project. 2019, [YEAR]
 //*
 //********************************************************************
 //*                                                                   
@@ -66,12 +66,12 @@
 //*
 //* ALLOCATE TARGET LIBRARIES
 //*
-//ALLOCT   PROC HLQ=,
+//ALLOCT   PROC THLQ=,
 //            TVOL=,
 //            DSP=
 //*
 //ALLOCT   EXEC PGM=IEFBR14,COND=(4,LT),PARM='&TVOL'
-//AZWEAUTH DD SPACE=(TRK,(15,5,5)),
+//SZWEAUTH DD SPACE=(TRK,(15,5,5)),
 //            UNIT=SYSALLDA,
 //*           VOL=SER=&TVOL,
 //            DISP=(NEW,&DSP),
@@ -79,7 +79,7 @@
 //            RECFM=U,
 //            LRECL=0,
 //            BLKSIZE=6999,
-//            DSN=&HLQ..SZWEAUTH
+//            DSN=&THLQ..SZWEAUTH
 //*
 //SZWESAMP DD SPACE=(TRK,(15,5,5)),
 //            UNIT=SYSALLDA,
@@ -89,13 +89,13 @@
 //            RECFM=FB,
 //            LRECL=80,
 //            BLKSIZE=0,
-//            DSN=&HLQ..SZWESAMP
+//            DSN=&THLQ..SZWESAMP
 //*
 //EALLOCT  PEND
 //*
 //* ALLOCATE DISTRIBUTION LIBRARIES
 //*
-//ALLOCD   PROC HLQ=,
+//ALLOCD   PROC DHLQ=,
 //*           DVOL=,
 //            DSP=
 //*
@@ -108,7 +108,7 @@
 //            RECFM=U,
 //            LRECL=0,
 //            BLKSIZE=6999,
-//            DSN=&HLQ..AZWEAUTH
+//            DSN=&DHLQ..AZWEAUTH
 //*
 //AZWESAMP DD SPACE=(TRK,(15,5,5)),
 //            UNIT=SYSALLDA,
@@ -118,7 +118,7 @@
 //            RECFM=FB,
 //            LRECL=80,
 //            BLKSIZE=0,
-//            DSN=&HLQ..AZWESAMP
+//            DSN=&DHLQ..AZWESAMP
 //*
 //AZWEZFS  DD SPACE=(TRK,(12000,3000,30)),
 //            UNIT=SYSALLDA,
@@ -128,7 +128,7 @@
 //            RECFM=VB,
 //            LRECL=6995,
 //            BLKSIZE=0,
-//            DSN=&HLQ..AZWEZFS
+//            DSN=&DHLQ..AZWEZFS
 //*
 //EALLOCD  PEND
 //*
@@ -137,16 +137,16 @@
 //*  exist with proper allocations.
 //*
 //ALLOCT   EXEC ALLOCT,       * Allocate Target Libraries
-//*                        1         2         3
-//*               12345678901234567890123456789012345
-//            HLQ=#thlq,
+//*                         1         2         3
+//*                12345678901234567890123456789012345
+//            THLQ=#thlq,
 //            TVOL=#tvol,
 //            DSP=CATLG
 //*
 //ALLOCD   EXEC ALLOCD,       * Allocate Distribution Libraries
-//*                        1         2         3
-//*               12345678901234567890123456789012345
-//            HLQ=#dhlq,
+//*                         1         2         3
+//*                12345678901234567890123456789012345
+//            DHLQ=#dhlq,
 //            DVOL=#dvol,
 //            DSP=CATLG
 //*

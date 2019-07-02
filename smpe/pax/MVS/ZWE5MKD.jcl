@@ -7,7 +7,7 @@
 //*
 //* SPDX-License-Identifier: EPL-2.0
 //*
-//* 5698-ZWE Copyright Contributors to the Zowe Project. 2019, [YEAR]
+//* Copyright Contributors to the Zowe Project. 2019, [YEAR]
 //*
 //********************************************************************
 //*
@@ -63,11 +63,14 @@
 //*    ZWEMKDIR REXX will strip leading and trailing blanks and
 //*    combine all lines in DD ROOT into a single path name.
 //*
-//* 4. Ensure you execute this job with a userid that is UID 0, or
+//* 4. If you used the optional ZWE4ZFS job, the value in DD ROOT must
+//*    match the value for the same DD in that job.
+//*
+//* 5. Ensure you execute this job with a userid that is UID 0, or
 //*    that is permitted to the 'BPX.SUPERUSER' profile in the
 //*    FACILITY security class.
 //*
-//* 5. This job should complete with a return code 0.
+//* 6. This job should complete with a return code 0.
 //*    If not, check the output, consult the z/OS UNIX System
 //*    Services Messages and Codes manual to correct the problem,
 //*    and resubmit this job.

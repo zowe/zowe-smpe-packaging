@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 #% (Re)Create Zowe SMP/E packaging configuration file.
@@ -122,7 +122,7 @@ do case "$opt" in
   1)   export fmid1="$OPTARG";;
   2)   export fmid2="$OPTARG";;
   [?]) _displayUsage
-       test $opt = '?' || echo "** ERROR faulty startup argument: $@"
+       test $opt = '?' || echo "** ERROR $me faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt
 done    # getopts

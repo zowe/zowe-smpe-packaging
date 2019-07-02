@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 #% cut installed product in smaller chunks and pax them
@@ -486,6 +486,9 @@ awk '/^#USS/ {print $2,$3,$4}' $log/$manifest \
 # create data set snapshot to assist with tracking members
 echo "-- creating $log/$dataSet"
 test -f $log/$dataSet && _cmd rm -f $log/$dataSet
+pwd
+echo "I am here $here"
+
 # get data set list (no debug mode to avoid debug messages)
 datasets=$($here/$csiScript "${mvsI}.**")
 # returns 0 for match, 1 for no match, 8 for error
@@ -564,7 +567,7 @@ cut -c 10-17 $log/$parts 2>&1 | sort 2>&1 | sort -uc 2>&1
 if test $? -ne 0              # note: sort -uc stops at first duplicate
 then
   # error details already reported
-  echo "** ERROR duplicate part name encountered"
+  echo "** ERROR $me duplicate part name encountered"
   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
 fi    #
 
@@ -889,7 +892,7 @@ do case "$opt" in
   d)   debug="-d";;
   i)   in="$OPTARG";;
   [?]) _displayUsage
-       test $opt = '?' || echo "** ERROR faulty startup argument: $@"
+       test $opt = '?' || echo "** ERROR $me faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt
 done    # getopts

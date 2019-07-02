@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * 5698-ZWE Copyright Contributors to the Zowe Project. 2019, [YEAR]
+ * Copyright Contributors to the Zowe Project. 2019, [YEAR]
  */
 /*
  *% This exec will create a mountpoint, optionally mount a file system
@@ -235,14 +235,14 @@ end    /* process payload */
 
 /* . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . */
 
-if eUid <> 0 then address SYSCALL 'seteuid' eUid
-if ExecEnv <> 'OMVS' then call syscalls('OFF')
+if eUid <> 0 then address SYSCALL 'seteuid' eUid        /* ignore RC */
+if ExecEnv <> 'OMVS' then call syscalls 'OFF'           /* ignore RC */
 say ' '
 say '*' ExecName 'ended with return code' cRC
 say ' '
 exit cRC
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Makes a directory path, similar to mkdir -pm
  * Returns return code
  * Updates Report.
@@ -302,7 +302,7 @@ if (cRC == 0) & (pBits <> '') & (pBits <> DefaultMask)
 if Debug then say '< _mkdir' cRC
 return cRC    /* _mkdir */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Mount a file system
  * Returns return code
  * Updates Report.
@@ -403,7 +403,7 @@ if cRC <= 4
 if Debug then say '< _mount' cRC
 return cRC    /* _mount */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Show mount information for Path
  * Returns return code
  * Updates Report.
@@ -453,15 +453,14 @@ end    /* */
 if Debug then say '< _mountInfo' cRC
 return cRC    /* _mountInfo */
 
-
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Process DD ROOT
  * Returns return code
  * Updates Root (no trailing /, can be '')
  * Args:
  *  DD: DD name to process
  */
-_rootDD: PROCEDURE EXPOSE Debug Root
+_rootDD: PROCEDURE EXPOSE Debug ExecEnv Root
 parse upper arg DD
 if Debug then say '> _rootDD' DD
 cRC=0                                              /* assume success */
@@ -498,14 +497,14 @@ say '-- will create root "'Root'"'
 if Debug then say '< _rootDD' cRC
 return cRC    /* _rootDD */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Process DD DIRS
  * Returns return code
  * Updates Dirs.
  * Args:
  *  DD: DD name to process
  */
-_dirsDD: PROCEDURE EXPOSE Debug Dirs.
+_dirsDD: PROCEDURE EXPOSE Debug ExecEnv Dirs.
 parse upper arg DD
 if Debug then say '> _dirsDD'
 cRC=0                                              /* assume success */
@@ -556,7 +555,7 @@ if Debug then do T=0 to Dirs.0; say '. Dirs.'T'="'Dirs.T'"'; end
 if Debug then say '< _dirsDD' cRC
 return cRC    /* _dirsDD */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Display script usage information
  * Returns nothing
  * Args: /
@@ -578,7 +577,7 @@ end    /* while T */
 say ''
 return    /* _displayUsage */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- set access rights for an existing path
  * Returns return code
  * Updates Report.
@@ -648,7 +647,7 @@ end    /* loop T */
 if Debug then say '< _setPathAccess' cRC
 return cRC    /* _setPathAccess */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Find which part of Path already exists
  * Returns
  *  cRC    : return code
@@ -707,7 +706,7 @@ if Debug then say '. rc' cRC', resolved' RealDir', old' ,
 if Debug then say '< _existPath' cRC
 return cRC','RealDir','Dir','NoExist    /* _existPath */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Execute z/OS UNIX syscall command with basic error handling
  * Returns boolean indicating success (1) or not (0)
  * Args:
@@ -724,7 +723,7 @@ _syscall: /* NO PROCEDURE */
 parse arg _Cmd,_Verbose,_Exit
 parse value _Verbose 1 with _Verbose .  /* default: report USS error */
 parse value _Exit 1 with _Exit .      /* default: exit on REXX error */
-_Success=1
+_Success=1  /* TRUE */ 
 _Err.0=0
 
 if Debug then say '. (syscall)' _Cmd
@@ -735,7 +734,7 @@ if Debug then say '.           rc' _RC 'retval' _RetVal ,
 
 if _RC < 0
 then do                                                /* REXX error */
-  _Success=0
+  _Success=0  /* FALSE */
   say ''
   say '** ERROR syscall command failed:' _Cmd
   select
@@ -752,7 +751,7 @@ then do                                                /* REXX error */
 end    /* REXX error */
 else if _RetVal == -1
   then do                                              /* UNIX error */
-    _Success=0
+    _Success=0  /* FALSE */
     if _Verbose
     then do                                      /* report the error */
       say ''
@@ -769,7 +768,7 @@ drop rc retval errno errnojr /* ensure that the name is used in parse*/
 parse value _RC _RetVal _ErrNo _ErrNoJr with rc retval errno errnojr
 return _Success    /* _syscall */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Convert boolean value to text
  * Returns FALSE or TRUE
  * Args:
@@ -778,7 +777,7 @@ return _Success    /* _syscall */
 _boolean: /* NO PROCEDURE */
 return word('FALSE TRUE',arg(1)+1)    /* _boolean */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- add arg(2) to Report.arg(1).x and increase Report.arg(1).0
  * Returns current value of Report.arg(1).x (which is 1)
  * Assumes Report. is primed to 1
@@ -812,7 +811,7 @@ _addReport: /* NO PROCEDURE */
 return value('Report.'arg(1)'.'value('Report.'arg(1) ||,
   '.0',value('Report.'arg(1)'.0')+1), arg(2))    /* _addReport */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Writes Report. data
  * Returns return code
  * Updates Report.
@@ -852,7 +851,7 @@ cRC=max(cRC,_ddWrite(DD,Count,''))
 if Debug then say '< _report' cRC
 return cRC    /* _report */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Write to DD
  * Returns return code
  * Args:
@@ -885,9 +884,10 @@ end    /* select */
 if Debug then say '< _ddWrite' cRC
 return cRC    /* _ddWrite */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Read DD and place content in stem Line.
  * Returns boolean indicating success (1) or not (0)
+ * Updates stem Line.
  * Args:
  *  DD: DD name to read
  *
@@ -916,28 +916,102 @@ end    /* */
 if Debug then say '< _ddRead' _boolean(Success)
 return Success    /* _ddRead */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Test whether DD exists or not
  * Returns boolean indicating DD exists (1) or not (0)
  * Args:
  *  DD: DD name to test
  *
+ * listdsi is picky and can throw RC16 RSNxx for valid allocations,
+ *  using LISTALC as backup method
  * listdsi documentation in "TSO/E REXX Reference (SA22-7790)"
+ * LISTALC documentation in "TSO/E Command Reference (SA22-7782)"
  */
-_ddExist: PROCEDURE EXPOSE Debug
+_ddExist: PROCEDURE EXPOSE Debug ExecEnv
 parse upper arg DD
 if Debug then say '> _ddExist' DD
+Exist=0  /* FALSE */                             /* assume not found */
 
-cRC=listdsi(DD 'FILE')
-if Debug then say '. listdsi' DD 'RC' cRC 'RSN' SYSREASON
+if (ExecEnv \= 'OMVS') & \Exist
+then do
+  cRC=listdsi(DD 'FILE')
+  if Debug then say '. listdsi' DD 'RC' cRC 'RSN' SYSREASON
            /* sysout/sysin/dummy *//* not catlg'd */ /* tmp data set */
-Exist=((cRC <=4) | (SYSREASON = 3) | (SYSREASON = 5) | (SYSREASON = 27))
-if Debug & \Exist then say '.' SYSMSGLVL2
+  Exist=((cRC <=4) | (SYSREASON =3) | (SYSREASON =5) | (SYSREASON =27))
+  if Debug & \Exist then say '.' SYSMSGLVL2
+end    /* not in OMVS & not found */
+
+if (ExecEnv \= 'OMVS') & \Exist
+then do
+  if Debug then say '. parsing LISTALC output'
+  
+  call outtrap Line.
+  "LISTALC STATUS SYSNAMES"
+  call outtrap 'OFF'
+  if rc \= 0
+  then do
+    say '** ERROR LISTALC RC' rc 'while searching for DD' DD
+    do T=1 to Line.0 ; say Line.T ; end
+  end    /* rc <> 0 */
+  else do
+    /* sample LISTALC output:
+     * //TEST     EXEC PGM=IKJEFT01,REGION=0M,COND=(4,LT),
+     * //            PARM='LISTALC STATUS SYSNAMES'
+     * //PASS     DD DISP=(NEW,PASS),SPACE=(CYL,(1,1)),UNIT=SYSALLDA,
+     * //            DCB=(DSORG=PS,RECFM=FB,LRECL=80)
+     * //CONCAT   DD DISP=SHR,DSN=IBMUSER.EXEC
+     * //         DD DISP=SHR,DSN=IBMUSER.NEW.EXEC
+     * //SYSTSPRT DD SYSOUT=*
+     * //SYSTSIN  DD DUMMY
+     * //CONCAT2  DD DUMMY
+     * //         DD DISP=SHR,DSN=IBMUSER.JCL
+     * //         DD DUMMY
+     * //USS      DD PATH='/u/ibmuser'
+     * //CONCAT3  DD DISP=(NEW,PASS),SPACE=(CYL,(1,1)),UNIT=SYSALLDA,
+     * //            DCB=(DSORG=PS,RECFM=FB,LRECL=80)
+     * //         DD DISP=SHR,DSN=IBMUSER.EXEC
+     * //         DD DISP=SHR,DSN=IBMUSER.NEW.EXEC
+     *
+     * --DDNAME---DISP--
+     * SYS17039.T182438.RA000.LISTA.R0109101
+     *   PASS     PASS
+     * IBMUSER.EXEC
+     *   CONCAT   KEEP
+     * IBMUSER.NEW.EXEC
+     *            KEEP
+     * IBMUSER.LISTA.JOB20098.D0000101.?
+     *   SYSTSPRT DELETE
+     * NULLFILE  SYSTSIN
+     * NULLFILE  CONCAT2
+     * IBMUSER.JCL
+     *            KEEP
+     * NULLFILE
+     * /u/ibmuser
+     *   USS      KEEP,KEEP
+     * SYS17039.T182438.RA000.LISTA.R0109102
+     *   CONCAT3  PASS
+     * IBMUSER.EXEC
+     *            KEEP
+     * IBMUSER.NEW.EXEC
+     *            KEEP
+     */
+  
+    /*do T=0 to Line.0; say '. LISTALC' T Line.T; end*/     /* trace */
+    do T=1 to Line.0
+      parse var Line.T word1 word2 .
+      if word2 == '' then iterate                     /* NEXT LOOP T */
+      if word1 == 'NULLFILE' then word1=word2
+      if DD == word1 then leave     /* found DD ? */ /* LEAVE LOOP T */
+    end    /* loop T */
+
+    Exist=(T <= Line.0)
+  end    /* LISTALC rc 0 */
+end    /* not in OMVS & not found */
 
 if Debug then say '< _ddExist' _boolean(Exist)
 return Exist    /* _ddExist */
 
-/*-------------------------------------------------------------------
+/*---------------------------------------------------------------------
  * --- Test whether DSN exists or not
  * Returns boolean indicating DSN exists (1) or not (0)
  * Args:

@@ -7,15 +7,15 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 # Adjust product to test new install scenario without updating build.
 #
 # Arguments:
-# -d           (optional) debug mode
-# PROD | SMPE  keyword indicating which install must be updated
-# dir          target directory ($INSTALL_DIR)
+# -d                 (optional) debug mode
+# PROD | SMPE | CONF keyword indicating which install must be updated
+# dir                target directory ($INSTALL_DIR)
 
 root=$(dirname $0) ; cd $root ; root=$PWD
 new=$root/_new                 # location of overrides
@@ -41,6 +41,8 @@ _cmd rm -r $dir/scripts/*                                           #*/
 _cmd rm -r $dir/files/templates/*                                   #*/
 _cmd rm -r $dir/files/zss/SAMPLIB/*                                 #*/
 
+_cmd rm -r $dir/files/scripts/*                                     #*/
+
 # add overrides - update in Zowe build process
 _cmd cp $new/ZWESIP00                            $dir/files/zss/SAMPLIB
 _cmd cp $new/ZWESIPRG                            $dir/files/zss/SAMPLIB
@@ -50,7 +52,7 @@ _cmd cp $new/ZWESECUR.jcl                        $dir/files/templates
 _cmd cp $new/ZWESTC.jcl                          $dir/files/templates
 _cmd cp $new/zowe.yaml                           $dir/install
 _cmd cp $new/zowe-install.sh                     $dir/install
-_cmd cp $new/zowe-configure.sh                   $dir/install
+# removed in June 24 drop  _cmd cp $new/zowe-configure.sh                   $dir/install
 _cmd cp $new/zowe-parse-yaml.sh                  $dir/scripts
 _cmd cp $new/zowe-set-envvars.sh                 $dir/scripts
 _cmd cp $new/zowe-install-zlux.sh                $dir/scripts
@@ -65,11 +67,35 @@ _cmd cp $new/check-dataset-exist.sh              $dir/scripts
 _cmd cp $new/check-dataset-dcb.sh                $dir/scripts
 _cmd cp $new/unpax.sh                            $dir/scripts
 _cmd cp $new/copy.sh                             $dir/scripts
-#_cmd cp $new/                                    $dir/scripts
+
+# >>> new in June 24 drop <<<
+
+_cmd cp $new/pax/admin.pax                       $dir/files
+_cmd cp $new/data-sets-api-server-start.sh       $dir/files/scripts
+_cmd cp $new/jobs-api-server-start.sh            $dir/files/scripts
+
+_cmd cp $new/start-explorer-jes-ui-server.sh  $dir/jes_explorer/scripts
+_cmd cp $new/start-explorer-mvs-ui-server.sh  $dir/mvs_explorer/scripts
+_cmd cp $new/start-explorer-uss-ui-server.sh  $dir/uss_explorer/scripts
+
+_cmd cp $new/opercmd.rex                              $dir/scripts
+_cmd cp $new/zowe-configure-api-mediation.sh          $dir/scripts
+_cmd cp $new/zowe-configure-apiml-certificates.sh     $dir/scripts
+_cmd cp $new/zowe-configure-explorer-ui.sh            $dir/scripts
+_cmd cp $new/zowe-configure-jcllib.sh                 $dir/scripts
+_cmd cp $new/zowe-configure-parmlib.sh                $dir/scripts
+_cmd cp $new/zowe-configure-proclib.sh                $dir/scripts
+_cmd cp $new/zowe-configure-zlux-add-iframe-plugin.sh $dir/scripts
+_cmd cp $new/zowe-configure-zlux-add-plugin.sh        $dir/scripts
+_cmd cp $new/zowe-configure-zlux-authorize.sh         $dir/scripts
+_cmd cp $new/zowe-configure-zlux.sh                   $dir/scripts
+_cmd cp $new/zowe-install-admin.sh                    $dir/scripts
+_cmd cp $new/zowe-run.sh                              $dir/scripts
 }    # _product
 # ---------------------------------------------------------------------
 function _smpe
 {
+# add overrides - update in Zowe build process
 _cmd cp $new/smpe-members.sh                               $dir 
 _cmd cp $new/ZWE1SMPE.jcl                                  $dir/MVS
 _cmd cp $new/ZWE2RCVE.jcl                                  $dir/MVS
@@ -90,8 +116,23 @@ _cmd cp $new/ZWESHPAX.sh                                   $dir/USS
 _cmd cp $new/allocate-dataset.sh                           $dir/scripts
 _cmd cp $new/check-dataset-exist.sh                        $dir/scripts
 _cmd cp $new/check-dataset-dcb.sh                          $dir/scripts
-#_cmd cp $new/                                              $dir/scripts
 }    # _smpe
+# ---------------------------------------------------------------------
+function _conf
+{
+
+# >>> new in June 24 drop <<<
+
+# clear data that will be renamed or now resides elsewhere
+_cmd mv $dir/api-mediation/scripts/apiml_cm.sh             $dir/scripts
+_cmd rm -r $dir/api-mediation/scripts/*
+
+# add overrides - update in Zowe build process
+_cmd cp $new/deploy.sh                                  $dir/zlux-build 
+_cmd cp $new/api-mediation-start-catalog.sh  $dir/api-mediation/scripts
+_cmd cp $new/api-mediation-start-discovery.sh $dir/api-mediation/scripts
+_cmd cp $new/api-mediation-start-gateway.sh  $dir/api-mediation/scripts
+}    # _conf
 
 # ---------------------------------------------------------------------
 # --- show & execute command, and bail with message on error
@@ -165,6 +206,7 @@ fi    #
 _cmd chmod 755 $new/*                                               #*/
 test "$1" = "PROD" && _product
 test "$1" = "SMPE" && _smpe
+test "$1" = "CONF" && _conf
 
 test "$debug" && echo "< $me 0"
 exit 0

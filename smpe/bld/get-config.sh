@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 # Set SMP/E packaging variables based on config file.
@@ -62,7 +62,7 @@ test "$debug" && echo && echo "> _writeConfiguationFile $@"
 test "$debug" && echo
 test "$debug" && echo "cat <<EOF 2>&1 >$1"
 # - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * -
-# KEEP IN SYNC WITH _parseConfiguationFile
+# TODO KEEP IN SYNC WITH _parseConfiguationFile
 cat <<EOF 2>&1 >$1
 #
 # configuration file for Zowe SMP/E packaging
@@ -102,8 +102,8 @@ split:
   # temporary directory to split product in chunks
   split=
 fmid:
-  # RELFILE & SMPMCS high level qualifier, must end with FMID name
-  mcsHlq=
+  # RELFILE data set name prefix, SMP/E expects #hlq.$RFDSNPFX.$FMID.Fx
+  RFDSNPFX=
 gimzip:
   # high level qualifier for GIMZIP work files
   gimzipHlq=
@@ -156,7 +156,7 @@ do
     test "$debug" && echo "value   $value"
 
 # - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * - * -
-    # KEEP IN SYNC WITH _writeConfiguationFile
+    # TODO KEEP IN SYNC WITH _writeConfiguationFile
     # format: _export section key environment_variable default_value
 # base
     _export base    vrm        VRM
@@ -177,7 +177,7 @@ do
     _export split   mvs        mvs           ${ROOT}/mvs    # internal
     _export split   split      split         ${ROOT}/split  # internal
 # fmid
-    _export fmid    mcsHlq     mcsHlq        ${HLQ}         # output
+    _export fmid    RFDSNPFX   RFDSNPFX      ZOWE           # output
 # gimzip
     _export gimzip  gimzipHlq  gimzipHlq     ${HLQ}.GIMZIP  # internal  
     _export gimzip  gimzip     gimzip        ${ROOT}/gimzip # output    

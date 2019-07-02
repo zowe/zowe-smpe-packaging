@@ -30,9 +30,9 @@
 //*
 //*   - Change:
 //*       @PREFIX@
-//*       ----+----1----+----2----+
+//*       ----+----1----+----2
 //*                  - To your desired data set name prefix
-//*                  - Maximum length is 25 characters
+//*                  - Maximum length is 20 characters
 //*                  - This value is used for the names of the
 //*                    data sets extracted from the download-package
 //*       @zfs_path@
@@ -183,9 +183,9 @@
 //* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //*   - Change:
 //*       @PREFIX@
-//*       ----+----1----+----2----+
+//*       ----+----1----+----2
 //*                  - To your desired data set name prefix
-//*                  - Maximum length is 25 characters
+//*                  - Maximum length is 20 characters
 //*                  - This value is used for the names of the
 //*                    data sets extracted from the download-package
 //*       @zfs_path@

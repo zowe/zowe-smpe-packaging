@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+ * Copyright Contributors to the Zowe Project. 2019, 2019
  */
 /*
  *% Get a list of data set names that match a filter (sent to stdout).
@@ -22,14 +22,14 @@
  *% 1: no data set matches filter
  *% 8: error
  *%
- *% user must be authorized to use this utility:
+ *% User must be authorized to use this utility:
  *% SYS1.LINKLIB(IGGCSI00) catalog search interface
  */
 /* user variables ...................................................*/
 
 /* system variables .................................................*/
 cRC=0                                              /* assume success */
-debug=0                                  /* assume not in debug mode */
+Debug=0                                  /* assume not in debug mode */
 
 /* system code ......................................................*/
 parse source . . ExecName . . . . ExecEnv .         /* get exec info */
@@ -39,26 +39,26 @@ ExecName=substr(ExecName,lastpos('/',ExecName)+1)  /* $(basename $0) */
 if word(arg(1),1) <> '-d'                         /* no debug mode ? */
 then parse arg Args                     /* get all startup arguments */
 else do
-  debug=1
+  Debug=1
   parse arg . Args /* do not include the first (-d) startup argument */
 end    /* */
 /* process in two steps to have all startup args in 1 variable; Args */
 parse var Args Dsn Trash              /* split in multiple variables */
 
-if debug then do; say ''; say '>' ExecName Args; end
+if Debug then do; say ''; say '>' ExecName Args; end
 
 /* validate startup arguments */
 if Dsn == ''
 then do
   call _displayUsage
-  say '** ERROR dsn is required'
+  say '** ERROR' ExecName 'dsn is required'
   cRC=8
 end    /* */
 
 if Trash \= ''
 then do
   call _displayUsage
-  say '** ERROR invalid startup argument'
+  say '** ERROR' ExecName 'invalid startup argument'
   cRC=8
 end    /* */
 
@@ -67,12 +67,12 @@ end    /* */
 /* get DSN list */
 if cRC == 0 then cRC=_readCatalog(Dsn,'A')
 
-if debug then say '<' ExecName cRC
+if Debug then say '<' ExecName cRC
 exit cRC                                            /* LEAVE PROGRAM */
 
-/*-------------------------------------------------------------------
- * --- display script usage information
- * returns nothing
+/*---------------------------------------------------------------------
+ * --- Display script usage information
+ * Returns nothing
  */
 _displayUsage: PROCEDURE EXPOSE ExecName
 say ''
@@ -91,10 +91,10 @@ end    /* while T */
 say ''
 return    /* _displayUsage */
 
-/*-------------------------------------------------------------------
- * --- displays data set names that match the filter
- * retuns return code
- * args:
+/*---------------------------------------------------------------------
+ * --- Displays data set names that match the filter
+ * Retuns return code
+ * Args:
  *  Filter: limit catalog search to this mask (*, ** and % allowed)
  *  Type  : (optional) up to 16 letters indicating which data set
  *          types are acceptable (see dType variable for list)
@@ -102,17 +102,17 @@ return    /* _displayUsage */
  *  Vsam  : (optional) 'Y' to show DATA & INDEX of VSAM cluster
  *          default only shows cluster name
  *
- * user must be authorized to use this utility:
+ * User must be authorized to use this utility:
  * SYS1.LINKLIB(IGGCSI00) catalog search interface
  *
- * documentation in "DFSMS: Managing Catalogs (SC23-6853)"
+ * Documentation in "DFSMS: Managing Catalogs (SC23-6853)"
  */
-_readCatalog: PROCEDURE EXPOSE debug
+_readCatalog: PROCEDURE EXPOSE ExecName Debug
 parse upper arg Filter,Type,Vsam       /* get arguments in uppercase */
 if Type == '' then Type=' '         /* default: Type=' ' (allow all) */
 if Vsam == '' then Vsam=' '      /* default: Vsam=' ' (only cluster) */
 
-if debug then say '> _readCatalog' Filter','Type','Vsam
+if Debug then say '> _readCatalog' Filter','Type','Vsam
 
 /* initialize invocation variables ..................................*/
 Resume  ='Y'                                     /* prepare to loop  */
@@ -201,13 +201,13 @@ do while Resume = 'Y'
 /* iterate when resume is necessary */
   if (Resume = 'Y') & (PrevName = dName)    /* if we tried this one  */
   then do                                   /* twice, we got to quit */
-    say '** ERROR' dName 'cannot be processed with the work area',
-        'provided, increase the work area size and retry'
+    say '** ERROR' ExecName dName 'cannot be processed with the work',
+        'area provided, increase the work area size and retry'
     cRC=8
     leave                                              /* LEAVE LOOP */
   end    /* error */
   PrevName=dName                          /* save for next iteration */
 end    /* do while */
 
-if debug then say '< _readCatalog' cRC
+if Debug then say '< _readCatalog' cRC
 return cRC      /* _readCatalog */

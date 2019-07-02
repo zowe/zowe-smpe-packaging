@@ -1,4 +1,4 @@
-++FUNCTION([FMID]) FILES(4) REWORK([DATE])
+++FUNCTION([FMID]) FILES(4) REWORK([DATE]) RFDSNPFX([RFDSNPFX])
   DESC(Zowe Open Source Project)
 /*
  * This program and the accompanying materials are made available
@@ -8,10 +8,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- * 5698-ZWE Copyright Contributors to the Zowe Project. 2019, [YEAR]
+ * Copyright Contributors to the Zowe Project. 2019, [YEAR]
  */
   .
-++VER(Z038)
+++VER(Z038,C150,P115) /* zOS, CICS, IMS & DB2 */
 /* SUP( ) */
 /* DELETE( ) */
   .

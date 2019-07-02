@@ -7,7 +7,7 @@
 //*
 //* SPDX-License-Identifier: EPL-2.0
 //*
-//* 5698-ZWE Copyright Contributors to the Zowe Project. 2019, [YEAR]
+//* Copyright Contributors to the Zowe Project. 2019, [YEAR]
 //*
 //********************************************************************
 //*

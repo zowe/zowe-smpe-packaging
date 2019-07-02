@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 #% package prepared product as base FMID (++FUNCTION)
@@ -65,18 +65,18 @@ done    # for dsn
 dd="S${prefix}SAMP"
 list=$(awk '/^'$dd'/{print $2}' $log/$parts \
      | grep -e ^${prefix}[[:digit:]] -e ^${prefix}MKDIR$)
-_copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F1" "FB" "80" "PO" "10,2"
+_copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F1" "FB" "80" "PO" "5,2"
 
 # F2 - all sample members except SMP/E install related
 dd="S${prefix}SAMP"
 list=$(awk '/^'$dd'/{print $2}' $log/$parts \
      | grep -v ^${prefix}[[:digit:]] | grep -v ^${prefix}MKDIR$)
-_copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F2" "FB" "80" "PO" "10,2"
+_copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F2" "FB" "80" "PO" "5,2"
 
 # F3 - all load modules
 dd="S${prefix}AUTH"
 list=$(awk '/^'$dd'/{print $2}' $log/$parts)
-_copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F3" "U" "**" "PO" "10,2"
+_copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F3" "U" "**" "PO" "5,2"
 
 # F4 - all USS files
 # half-track on 3390 DASD is 27998 bytes
@@ -113,9 +113,11 @@ rc=$?
 if test $rc -eq 0
 then
   # customize SMPMCS
-  _cmd --repl $file.new sed \
-    "s/\[FMID\]/$FMID/g;s/\[YEAR\]/$year/g;s/\[DATE\]/$julian/g" \
-    $file
+  SED="s/\[FMID\]/$FMID/g"             
+  SED="$SED;s/\[YEAR\]/$year/g"        
+  SED="$SED;s/\[DATE\]/$julian/g"      
+  SED="$SED;s/\[RFDSNPFX\]/$RFDSNPFX/g"
+  _cmd --repl $file.new sed "$SED" $file
 
   # TODO dynamically add parts processed by _relFiles()
 
@@ -351,7 +353,7 @@ do case "$opt" in
   c)   YAML="$OPTARG";;
   d)   debug="-d";;
   [?]) _displayUsage
-       test $opt = '?' || echo "** ERROR faulty startup argument: $@"
+       test $opt = '?' || echo "** ERROR $me faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt
 done    # getopts
@@ -368,10 +370,12 @@ fi    #
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
+mcsHlq=${HLQ}.${RFDSNPFX}.${FMID}
+
 # show input/output details
 echo "-- input MVS: $mvsI"
 echo "-- input USS: $ussI"
-echo "-- output:    $HLQ"
+echo "-- output:    $mcsHlq"
 
 # create SMP/E installable FMID
 
