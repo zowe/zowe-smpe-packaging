@@ -21,7 +21,7 @@
 #%
 #% -c & -s are required
 
-allocScript=allocate-dataset.sh  # script to allocate data set
+allocScript=/scripts/allocate-dataset.sh  # script to allocate data set
 here="$( cd "$(dirname "$0")" ; pwd -P )"             # script location
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
