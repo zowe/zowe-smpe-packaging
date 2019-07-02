@@ -1,6 +1,6 @@
 {
   "files": [{
-      "pattern": "libs-snapshot-local/org/zowe/1.3.0-526-INSTALL-RUNS-FROM-ANYWHERE/zowe-1.3.0-526-install-runs-from-anywhere-1-20190702110733.pax",
+      "pattern": "libs-snapshot-local/org/zowe/1.3.0-526-INSTALL-RUNS-FROM-ANYWHERE/zowe-1.3.0-526-install-runs-from-anywhere-2-20190702135642.pax",
       "target": ".pax/zowe-1.3.5.pax",
       "flat": "true",
       "sortBy": ["created"],
