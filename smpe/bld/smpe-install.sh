@@ -50,6 +50,8 @@
 #..Assumes that if there are multiple input pax files, they all share
 #. the same leading directory, e.g. zowe-1.1.0.
 
+
+
 smpeFilter="/smpe"             # regex to find SMP/E archive name
 prodScript=install/zowe-install.sh  # product install script
 smpeScript=smpe-members.sh     # SMP/E-member install script
@@ -57,9 +59,9 @@ csiScript=get-dsn.rex          # catalog search interface (CSI) script
 cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
-#debug=-d                      # -d or null, -d triggers early debug
+debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
-#set -x                                                          #debug
+set -x                                                          #debug
 
 test "$debug" && echo && echo "> $me $@"
 
@@ -151,13 +153,22 @@ done    #
 # allow caller to alter product before install                   #debug
 test "$alter" && _cmd $alter $debug PROD $extract
 
+# set up yaml
+echo "-- Updating yaml file"
+CI_ZOWE_CONFIG_FILE=install/zowe-install.yaml
+cat "${CI_ZOWE_CONFIG_FILE}" | \
+  sed -e "/^install:/,\$s#rootDir=.*\$#rootDir=$stage#" | \
+  sed -e "/^zowe-server-proclib:/,\$s#dsName=.*\$#dsName=$mvsI.PROCLIB#" | \
+mv "${CI_ZOWE_CONFIG_FILE}.tmp" "${CI_ZOWE_CONFIG_FILE}"
+cat ${CI_ZOWE_CONFIG_FILE}
+
 # install product
 echo "-- installing product in $stage & $mvsI"
 opts=""
-opts="$opts -R"                                # remove input when done
-opts="$opts -i $stage"                         # target directory
-opts="$opts -h $mvsI"                          # target HLQ
-opts="$opts -f $log/$logFile"                  # install log
+#opts="$opts -R"                                # remove input when done
+#opts="$opts -i $stage"                         # target directory
+#opts="$opts -h $mvsI"                          # target HLQ
+#opts="$opts -f $log/$logFile"                  # install log
 _cmd $extract/$prodScript $debug $opts
 
 # verify everything is installed
