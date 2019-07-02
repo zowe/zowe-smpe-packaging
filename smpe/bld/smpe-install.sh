@@ -169,7 +169,7 @@ opts=""
 #opts="$opts -i $stage"                         # target directory
 #opts="$opts -h $mvsI"                          # target HLQ
 #opts="$opts -f $log/$logFile"                  # install log
-_cmd $extract/$prodScript $debug $opts
+_cmd $extract/$prodScript $opts
 
 # verify everything is installed
 echo "-- verifying product install"
