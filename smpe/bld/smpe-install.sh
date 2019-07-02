@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-# 5698-ZWE Copyright Contributors to the Zowe Project. 2019, 2019
+# Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
 
 #% stage Zowe product for SMP/E packaging
@@ -50,8 +50,6 @@
 #..Assumes that if there are multiple input pax files, they all share
 #. the same leading directory, e.g. zowe-1.1.0.
 
-
-
 smpeFilter="/smpe"             # regex to find SMP/E archive name
 prodScript=install/zowe-install.sh  # product install script
 smpeScript=smpe-members.sh     # SMP/E-member install script
@@ -59,7 +57,7 @@ csiScript=get-dsn.rex          # catalog search interface (CSI) script
 cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
-debug=-d                      # -d or null, -d triggers early debug
+#debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 #set -x                                                          #debug
 
@@ -498,7 +496,7 @@ do case "$opt" in
   i)   in="$OPTARG";;
   p)   preInst="$OPTARG";;
   [?]) _displayUsage
-       test $opt = '?' || echo "** ERROR faulty startup argument: $@"
+       test $opt = '?' || echo "** ERROR $me faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt
 done    # getopts
@@ -604,6 +602,9 @@ then
   _installSMPE
   _installOther
   _clearLog
+
+  # allow caller to alter product after install                  #debug
+  test "$alter" && _cmd $alter $debug CONF $extract
 else 
   # continue testing SMP/E tooling with broken product build     #debug
   echo "-- cloning data from $preInst to $stage"
