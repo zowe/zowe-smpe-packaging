@@ -61,7 +61,7 @@ here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
 debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
-set -x                                                          #debug
+#set -x                                                          #debug
 
 test "$debug" && echo && echo "> $me $@"
 
@@ -165,21 +165,24 @@ cat ${CI_ZOWE_CONFIG_FILE}
 # install product
 echo "-- installing product in $stage & $mvsI"
 opts=""
+opts="$opts -I"                                # Install only - no config
 #opts="$opts -R"                                # remove input when done
 #opts="$opts -i $stage"                         # target directory
 #opts="$opts -h $mvsI"                          # target HLQ
 #opts="$opts -f $log/$logFile"                  # install log
 _cmd $extract/$prodScript $opts
 
+
+# TODO - what is the purpose of this - it doesn't check the install at all?
 # verify everything is installed
-echo "-- verifying product install"
-orphan=$(find $extract ! -type d)
-if test "$orphan"
-then
-  echo "** ERROR $me not all files are moved to $stage or $mvsI"
-  echo "$orphan"                          # quotes preserve line breaks
-  test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
-fi    #
+# echo "-- verifying product install"
+# orphan=$(find $extract ! -type d)
+# if test "$orphan"
+# then
+#   echo "** ERROR $me not all files are moved to $stage or $mvsI"
+#   echo "$orphan"                          # quotes preserve line breaks
+#   test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
+# fi    #
 
 # reset extract location to original and clean up
 extract=$orig
