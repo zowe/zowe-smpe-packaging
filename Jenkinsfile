@@ -48,6 +48,7 @@ node('ibm-jenkins-slave-nvm') {
   )
 
   pipeline.packaging(
+    name: "zowe-smpe",
     operation: {
       pipeline.pax.pack(
           job             : "zowe-smpe-packaging",
