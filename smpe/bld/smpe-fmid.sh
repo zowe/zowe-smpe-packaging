@@ -21,7 +21,7 @@
 prefix=ZWE                     # product prefix
 parts=parts.txt                # parts known by SMP/E
 mcs=SMPMCS.txt                 # SMPMCS header
-allocScript=./content/scripts/allocate-dataset.sh  # script to allocate data set
+allocScript=../content/scripts/allocate-dataset.sh  # script to allocate data set
 csiScript=get-dsn.rex          # catalog search interface (CSI) script
 cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
@@ -73,10 +73,11 @@ list=$(awk '/^'$dd'/{print $2}' $log/$parts \
      | grep -v ^${prefix}[[:digit:]] | grep -v ^${prefix}MKDIR$)
 _copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F2" "FB" "80" "PO" "5,2"
 
+#TODO - no files in here, so empty?
 # F3 - all load modules
-dd="S${prefix}AUTH"
-list=$(awk '/^'$dd'/{print $2}' $log/$parts)
-_copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F3" "U" "**" "PO" "5,2"
+# dd="S${prefix}AUTH"
+# list=$(awk '/^'$dd'/{print $2}' $log/$parts)
+# _copyMvsMvs "${mvsI}.$dd" "${mcsHlq}.F3" "U" "**" "PO" "5,2"
 
 # F4 - all USS files
 # half-track on 3390 DASD is 27998 bytes
