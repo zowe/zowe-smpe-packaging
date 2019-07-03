@@ -51,14 +51,9 @@ echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
 mkdir -p zowe
 
-# run smpe.sh
-#  -a "${PWD}/bld/_alter.sh" \
-# ./bld/smpe.sh \
-#   -i "${PWD}/${INPUT_TXT}" \
-#   -v 120 \
-#   -r "${PWD}/zowe"
-
-echo "Manually run: $(pwd)# ./bld/smpe.sh -i \"${PWD}/${INPUT_TXT}\" -v 120 -r \"${PWD}/zowe\""
-
-# exit for manual processing
-exit 1
+run smpe.sh
+ -a "${PWD}/bld/_alter.sh" \
+./bld/smpe.sh \
+  -i "${PWD}/${INPUT_TXT}" \
+  -v 120 \
+  -r "${PWD}/zowe"
