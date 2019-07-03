@@ -12,11 +12,11 @@ set -x
 ################################################################################
 
 FUNC=[CreatePax][post-packaging]
-PWD=$(pwd)
+CURR_PWD=$(pwd)
 INPUT_TXT=input.txt
 
 # display extracted files
-echo "$FUNC content of $PWD...."
+echo "$FUNC content of $CURR_PWD...."
 find . -print
 
 # find zowe pax
@@ -44,9 +44,9 @@ else
 fi
 
 echo "$FUNC pareparing ${INPUT_TXT} ..."
-echo "${PWD}/${ZOWE_PAX}" > "${INPUT_TXT}"
-echo "${PWD}/${ZOWE_CLI}" >> "${INPUT_TXT}"
-echo "${PWD}/${SMPE_PAX}" >> "${INPUT_TXT}"
+echo "${CURR_PWD}/${ZOWE_PAX}" > "${INPUT_TXT}"
+echo "${CURR_PWD}/${ZOWE_CLI}" >> "${INPUT_TXT}"
+echo "${CURR_PWD}/${SMPE_PAX}" >> "${INPUT_TXT}"
 echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
 mkdir -p zowe
@@ -55,4 +55,12 @@ pwd
 ls ./bld/
 ls ./bld/smpe.sh
 
-./bld/smpe.sh -i "${PWD}/${INPUT_TXT}" -v 120 -r "${PWD}/zowe"
+./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v 120 -r "${CURR_PWD}/zowe"
+
+# get the final build result
+ZOWE_SMPE_PAX=$(ls ${CURR_PWD}/zowe/AZWE120/gimzip/AZWE*.pax.Z)
+if [ -z "${ZOWE_SMPE_PAX}" ]; then
+  echo "$FUNC cannot find build result zowe/AZWE120/gimzip/AZWE*.pax.Z"
+  exit 1
+fi
+mv "${ZOWE_SMPE_PAX}" "${CURR_PWD}/zowe-smpe.pax"

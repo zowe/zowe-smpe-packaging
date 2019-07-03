@@ -47,13 +47,22 @@ node('ibm-jenkins-slave-nvm') {
     timeout: [time: 5, unit: 'MINUTES']
   )
 
-  // how we packaging jars/zips
-  pipeline.packaging(name: 'zowe-smpe', keepTempFolder: true)
+  pipeline.packaging(
+    operation: {
+      pipeline.pax.pack(
+          job             : "zowe-smpe-packaging",
+          filename        : 'zowe-smpe.pax',
+          keepTempFolder  : true
+      )
+      // rename to correct suffix
+      sh "mv .pax/zowe-smpe.pax .pax/zowe-smpe.pax.Z"
+    }
+  )
 
   // define we need publish stage
   pipeline.publish(
     artifacts: [
-      '.pax/zowe-smpe.pax'
+      '.pax/zowe-smpe.pax.Z'
     ]
   )
 
