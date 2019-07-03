@@ -101,13 +101,15 @@ let cnt=$cnt+1 ; file=${mask}$(echo 0$cnt | sed 's/.*\(..\)$/\1/')
 _move $stage $split/$file "find zlux-* -prune"
 _move $stage $split/$file echo zss-auth
 
+#TODO - why are these being moved - shouldn't the install dirs be deleted?
 # all miscelaneous files in root and select directories
-let cnt=$cnt+1 ; file=${mask}$(echo 0$cnt | sed 's/.*\(..\)$/\1/')
-_move $stage $split/$file find . -level 0 ! -type d
-_move $stage $split/$file echo ./files
-_move $stage $split/$file echo ./install
-_move $stage $split/$file echo ./licenses
-_move $stage $split/$file echo ./scripts
+#let cnt=$cnt+1 ; file=${mask}$(echo 0$cnt | sed 's/.*\(..\)$/\1/')
+#_move $stage $split/$file find . -level 0 ! -type d
+#_move $stage $split/$file echo ./files
+#_move $stage $split/$file echo ./install
+#_move $stage $split/$file echo ./licenses
+#_move $stage $split/$file echo ./scripts
+_move $stage $split/$file echo ./manifest.json
 
 # all but select files in api-mediation root
 for f in $(find api-mediation -level 0 ! -type d | grep -v /enabler)
