@@ -55,7 +55,7 @@ here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
-#set -x                                                          #debug
+set -x                                                          #debug
 
 test "$debug" && echo && echo "> $me $@"
 
