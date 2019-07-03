@@ -55,4 +55,4 @@ pwd
 ls ./bld/
 ls ./bld/smpe.sh
 
-run ./bld/smpe.sh -i \"${PWD}/${INPUT_TXT}\" -v 120 -r \"${PWD}/zowe\"
+./bld/smpe.sh -i \"${PWD}/${INPUT_TXT}\" -v 120 -r \"${PWD}/zowe\"
