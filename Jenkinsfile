@@ -35,16 +35,24 @@ node('ibm-jenkins-slave-nvm') {
     ]
   )
 
-  pipeline.createStage(
-    name          : "Download Zowe",
+  pipeline.build(
+    timeout       : [time: 5, unit: 'MINUTES'],
     isSkippable   : false,
-    stage         : {
+    operation     : {
       pipeline.artifactory.download(
         spec        : 'artifactory-download-spec.json.template',
         expected    : 2
       )
+    }
+  )
+
+  // FIXME: we may move smoke test into this pipeline
+  pipeline.test(
+    name              : "Smoke",
+    operation         : {
+        echo 'Skip until test case are embeded into this pipeline.'
     },
-    timeout: [time: 5, unit: 'MINUTES']
+    allowMissingJunit : true
   )
 
   pipeline.packaging(
