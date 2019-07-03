@@ -53,7 +53,7 @@ mkdir -p zowe
 
 pwd
 
-run ./bld/smpe.sh -i \"${PWD}/${INPUT_TXT}\" -v 120 -r \"${PWD}/zowe\""
+run ./bld/smpe.sh -i \"${PWD}/${INPUT_TXT}\" -v 120 -r \"${PWD}/zowe\"
 
 # exit for manual processing
 #exit 1
