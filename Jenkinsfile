@@ -53,6 +53,7 @@ node('ibm-jenkins-slave-nvm') {
       pipeline.pax.pack(
           job             : "zowe-smpe-packaging",
           filename        : 'zowe-smpe.pax',
+          paxOptions      : '',
           keepTempFolder  : true
       )
       // rename to correct suffix
