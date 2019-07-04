@@ -55,7 +55,7 @@ pwd
 ls ./bld/
 ls ./bld/smpe.sh
 
-./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v 120 -r "${CURR_PWD}/zowe"
+./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v 001 -r "${CURR_PWD}/zowe"
 
 # get the final build result
 ZOWE_SMPE_PAX=$(ls ${CURR_PWD}/zowe/AZWE120/gimzip/AZWE*.pax.Z)
