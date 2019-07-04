@@ -76,5 +76,6 @@ mv "${ZOWE_SMPE_PAX}" "${CURR_PWD}/zowe-smpe.pax"
 mv "${ZOWE_SMPE_README}" "${CURR_PWD}/readme.txt"
 
 # prepare rename to original name
-echo "mv zowe-smpe.pax AZWE${FMID_VERISON}.pax.Z" > "${CURR_PWD}/rename-back.sh"
-echo "mv readme.txt AZWE${FMID_VERISON}.readme.txt" >> "${CURR_PWD}/rename-back.sh"
+echo "mv zowe-smpe.pax AZWE${FMID_VERISON}.pax.Z" > "${CURR_PWD}/rename-back.sh.1047"
+echo "mv readme.txt AZWE${FMID_VERISON}.readme.txt" >> "${CURR_PWD}/rename-back.sh.1047"
+iconv -f IBM-1047 -t ISO8859-1 rename-back.sh.1047 > rename-back.sh
