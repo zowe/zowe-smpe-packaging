@@ -12,7 +12,7 @@
 
 
 node('ibm-jenkins-slave-nvm') {
-  def lib = library("jenkins-library").org.zowe.jenkins_shared_library
+  def lib = library("jenkins-library@staging").org.zowe.jenkins_shared_library
 
   def pipeline = lib.pipelines.generic.GenericPipeline.new(this)
 
@@ -64,18 +64,19 @@ node('ibm-jenkins-slave-nvm') {
       pipeline.pax.pack(
           job             : "zowe-smpe-packaging",
           filename        : 'zowe-smpe.pax',
-          paxOptions      : '',
+          environments    : [ 'ZOWE_VERSION': pipeline.getVersion() ],
+          extraFiles      : 'readme.txt,rename-back.sh',
           keepTempFolder  : true
       )
       // rename to correct suffix
-      sh "mv .pax/zowe-smpe.pax .pax/zowe-smpe.pax.Z"
+      sh "chmod +x .pax/rename-back.sh && ./.pax/rename-back.sh"
     }
   )
 
   // define we need publish stage
   pipeline.publish(
     artifacts: [
-      '.pax/zowe-smpe.pax.Z'
+      '.pax/AZWE*'
     ]
   )
 
