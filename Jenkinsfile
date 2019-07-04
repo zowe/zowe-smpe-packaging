@@ -69,7 +69,7 @@ node('ibm-jenkins-slave-nvm') {
           keepTempFolder  : true
       )
       // rename to correct suffix
-      sh "chmod +x .pax/rename-back.sh && cat ./.pax/rename-back.sh && . .pax/rename-back.sh"
+      sh "cd .pax && chmod +x rename-back.sh && cat rename-back.sh && ./rename-back.sh"
     }
   )
 
