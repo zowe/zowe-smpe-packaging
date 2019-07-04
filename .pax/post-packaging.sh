@@ -54,10 +54,6 @@ echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
 mkdir -p zowe
 
-pwd
-ls ./bld/
-ls ./bld/smpe.sh
-
 ./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v ${FMID_VERISON} -r "${CURR_PWD}/zowe"
 
 # get the final build result
