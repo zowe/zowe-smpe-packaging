@@ -15,6 +15,9 @@ FUNC=[CreatePax][post-packaging]
 CURR_PWD=$(pwd)
 INPUT_TXT=input.txt
 
+# TODO - parameterize this?
+FMID_VERISON=001
+
 # display extracted files
 echo "$FUNC content of $CURR_PWD...."
 find . -print
@@ -55,12 +58,12 @@ pwd
 ls ./bld/
 ls ./bld/smpe.sh
 
-./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v 001 -r "${CURR_PWD}/zowe"
+./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v ${FMID_VERISON} -r "${CURR_PWD}/zowe"
 
 # get the final build result
-ZOWE_SMPE_PAX=$(ls ${CURR_PWD}/zowe/AZWE120/gimzip/AZWE*.pax.Z)
+ZOWE_SMPE_PAX=$(ls ${CURR_PWD}/zowe/AZWE${FMID_VERISON}/gimzip/AZWE${FMID_VERISON}.pax.Z)
 if [ -z "${ZOWE_SMPE_PAX}" ]; then
-  echo "$FUNC cannot find build result zowe/AZWE120/gimzip/AZWE*.pax.Z"
+  echo "$FUNC cannot find build result zowe/AZWE${FMID_VERISON}/gimzip/AZWE${FMID_VERISON}.pax.Z"
   exit 1
 fi
 mv "${ZOWE_SMPE_PAX}" "${CURR_PWD}/zowe-smpe.pax"
