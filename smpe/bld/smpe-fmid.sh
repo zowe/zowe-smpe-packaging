@@ -219,7 +219,7 @@ for file in $list
     unset X                   # -X is required for copying load modules
     test "$3" = "U" && X="-X"
     # cp -X requires z/OS V2R2 UA96711, z/OS V2R3 UA96707 (August 2018)
-    _cmd cp $X "$1/$file" "//'$2($file)'"
+    _cmd cp $X "$1/$file" "//'$2(${file%%.*})'"   # %%.* = no extension
 
     # TODO build SMPMCS data for this part
 

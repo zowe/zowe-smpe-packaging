@@ -632,7 +632,7 @@ test "$debug" && echo "< _parts"
 # The next 9 characters are in three groups of 3; they describe the 
 # permissions on the file. 
 # The first group of 3 describes owner permissions; the second describes 
-# group permissions; the third describes other (or �world�) permissions. 
+# group permissions; the third describes other (or "world") permissions. 
 # Characters that might appear are:
 # r  Permission to read the file.
 # w  Permission to write on the file.
@@ -932,15 +932,15 @@ _delta
 # gather data to assist with understanding product
 _snapshot
 
-# split $stage into smaller chunks, place the result in $split/*
+# split $stage into smaller chunks, place the result in $split/*    #*/
 _split
 
 # remove data of previous run (if any) ...
-test -e "$ussI" && _cmd rm -rf $ussI
+test -n "$(ls $ussI/$mask* 2>/dev/null)" && _cmd rm -rf $ussI/$mask*
 # ... and get ready to roll
 _cmd mkdir -p $ussI
 
-# loop through $split/* directories to
+# loop through $split/* directories to                              #*/
 # - add manifest
 # - set owner to mask build userid from customer
 # - create pax
