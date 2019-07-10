@@ -26,7 +26,7 @@ csiScript=get-dsn.rex          # catalog search interface (CSI) script
 cfgScript=get-config.sh        # script to read smpe.yaml config data
 here=$(dirname $0)             # script location
 me=$(basename $0)              # script name
-#debug=-d                      # -d or null, -d triggers early debug
+debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 set -x                                                          #debug
 
