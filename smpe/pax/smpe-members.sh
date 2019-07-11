@@ -109,7 +109,7 @@ do
 
   # customize the file
   _cmd --repl $file.new sed \
-    "s/\[FMID\]/$FMID/g;s/\[YEAR\]/$year/g" \
+    "s/\[RFDSNPFX\]/$RFDSNPFX/g;s/\[FMID\]/$FMID/g;s/\[YEAR\]/$year/g" \
     $file
 
   # move the customized file
