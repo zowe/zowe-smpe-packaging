@@ -614,7 +614,7 @@ fi    #
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-mcsHlq=${HLQ}
+mcsHlq=${HLQ}.${RFDSNPFX}.${FMID}
 
 echo "-- input:  $mcsHlq"
 echo "-- output: $gimzip"
