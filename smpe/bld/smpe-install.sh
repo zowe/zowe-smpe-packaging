@@ -171,6 +171,9 @@ opts="$opts -I"                                # Install only - no config
 #opts="$opts -f $log/$logFile"                  # install log
 _cmd $extract/$prodScript $opts
 
+#For debug
+ls -al $stage
+exit 1
 
 # TODO - what is the purpose of this - it doesn't check the install at all?
 # verify everything is installed
