@@ -105,14 +105,14 @@ _move $stage $split/$file echo zss-auth
 # all miscelaneous files in root and select directories
 #let cnt=$cnt+1 ; file=${mask}$(echo 0$cnt | sed 's/.*\(..\)$/\1/')
 #_move $stage $split/$file find . -level 0 ! -type d
-#_move $stage $split/$file echo ./files
-#_move $stage $split/$file echo ./install
-#_move $stage $split/$file echo ./licenses
-#_move $stage $split/$file echo ./scripts
-_move $stage $split/$file echo ./manifest.json
+#_move $stage $split/$file echo files
+#_move $stage $split/$file echo install
+#_move $stage $split/$file echo licenses
+#_move $stage $split/$file echo scripts
+_move $stage $split/$file echo manifest.json
 
-# all but select files in api-mediation root
-for f in $(find api-mediation -level 0 ! -type d | grep -v /enabler)
+# api-mediation has a few big jar files, give them their own pax
+for f in $(ls api-mediation/*.jar | grep -v /enabler)               #*/
 do
   let cnt=$cnt+1 ; file=${mask}$(echo 0$cnt | sed 's/.*\(..\)$/\1/')
   _move $stage $split/$file echo $f
@@ -180,11 +180,22 @@ _cmd cd $iDIR
 # show what will be moved
 $@
 
-# move data that matches filter
-test "$debug" && echo
-test "$debug" && echo "eval mv -R \$($@) $oDIR 2>&1"
-eval "mv -R \$($@) $oDIR 2>&1"
-test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                     # EXIT
+# can we move in bulk ? (not if there is a / in the input)
+if test -n "$($@ | grep /)"
+then 
+  # move data one by one as data is not all in root
+  for FiLe in $($@)
+  do
+    _cmd mkdir -p $oDIR/$(dirname $FiLe)
+    _cmd mv -R $FiLe $oDIR/$FiLe
+  done    # for FiLe
+else
+  # move all data that matches filter (requires data to be in root)
+  test "$debug" && echo
+  test "$debug" && echo "eval mv -R \$($@) $oDIR 2>&1"
+  eval "mv -R \$($@) $oDIR 2>&1"
+  test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                   # EXIT
+fi    #
 
 # return to previous directory
 _cmd --null cd -
@@ -934,6 +945,8 @@ _snapshot
 
 # split $stage into smaller chunks, place the result in $split/*    #*/
 _split
+
+# TODO compare manifest #USS with split result; everything in right place?
 
 # remove data of previous run (if any) ...
 test -n "$(ls $ussI/$mask* 2>/dev/null)" && _cmd rm -rf $ussI/$mask*
