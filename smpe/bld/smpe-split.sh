@@ -1035,8 +1035,8 @@ manifest=${mask}.${date}.${tail}                     # manifest file
 echo "-- input:  $stage"
 echo "-- output: $ussI"
 
-# do not pack install log
-test -e $ZOWE_ROOT_DIR/install_log && _cmd rm -rf $ZOWE_ROOT_DIR/install_log
+# if present, do not pack install log
+test -e $stage/install_log && _cmd rm -rf $stage/install_log
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
