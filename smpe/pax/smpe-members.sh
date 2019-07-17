@@ -21,9 +21,9 @@
 #%
 #% -c & -s are required
 
-allocScript=/scripts/allocate-dataset.sh  # script to allocate data set
-here="$( cd "$(dirname "$0")" ; pwd -P )"             # script location
-me=$(basename $0)              # script name
+allocScript=allocate-dataset.sh  # script to allocate data set
+here="$(cd "$(dirname "$0")";pwd)"  # script location
+me=$(basename "$0")            # script name
 #debug=-d                      # -d or null, -d triggers early debug
 #IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 #set -x                                                          #debug
@@ -45,7 +45,7 @@ test "$debug" && echo && echo "> _installMVS $@"
 dsn="${mvsI}.$1"
 
 # validate/create target data set
-$here/$allocScript $dsn "$2" "$3" "$4" "$5"
+$here/scripts/$allocScript $dsn "$2" "$3" "$4" "$5"
 # returns 0 for OK, 1 for DCB mismatch, 2 for not pds(e), 8 for error
 rc=$?
 if test $rc -eq 0
@@ -61,9 +61,10 @@ then
     fi    #
 
     # customize the file
-    _cmd --repl $file.new sed \
-      "s/\[FMID\]/$FMID/g;s/\[YEAR\]/$year/g" \
-      $file
+    SED="s/\[FMID\]/$FMID/g"
+    SED="$SED;s/\[YEAR\]/$year/g"
+    SED="$SED;s/\[RFDSNPFX\]/$RFDSNPFX/g"
+    _cmd --repl $file.new sed "$SED" $file
 
     # move the customized file
     mbr=$(basename $file)
@@ -108,12 +109,14 @@ do
   fi    #
 
   # customize the file
-  _cmd --repl $file.new sed \
-    "s/\[RFDSNPFX\]/$RFDSNPFX/g;s/\[FMID\]/$FMID/g;s/\[YEAR\]/$year/g" \
-    $file
+  SED="s/\[FMID\]/$FMID/g"
+  SED="$SED;s/\[YEAR\]/$year/g"
+  SED="$SED;s/\[RFDSNPFX\]/$RFDSNPFX/g"
+  _cmd --repl $file.new sed "$SED" $file
 
   # move the customized file
   fileName=$(basename $file)
+  fileName=${fileName%%.*}             # keep up to first . (exclusive)
   test "$LOG_FILE" && echo "  Copy $file to $1/$fileName" >> $LOG_FILE
   _cmd mv $file.new $1/$fileName
 
