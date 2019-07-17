@@ -139,6 +139,78 @@ test "$debug" && echo "< _smpmcs"
 }    # _smpmcs
 
 # ---------------------------------------------------------------------
+# --- verify that SMPMCS matches parts present
+# ---------------------------------------------------------------------
+function _verify
+{
+test "$debug" && echo && echo "> _verify $@"
+
+echo "-- verify SMPMCS matches staged files"
+
+# parse SMPMCS and keep SYSLIB name & part name, sorted
+# sample input:
+# ++SAMP(ZWE1SMPE)     SYSLIB(SZWESAMP) DISTLIB(AZWESAMP) RELFILE(1) .
+# sample output:
+# SZWESAMP ZWE1SMPE
+# - tr will change all round brackets to semi-colons
+# - awk will only take lines begininng with + and have keyword SYSLIB,
+#   split fields at a semi-colon, and print field 4 and 2
+mcsX="$here/$mcs"
+cMd="cat $mcsX"
+cMd="$cMd | tr \(\) ::"
+cMd="$cMd | awk -F\":\" '/^\+.*SYSLIB/ {printf(\"%-8s %-8s\n\",$4,$2)}'"
+cMd="$cMd | sort"
+cMd="$cMd > $mcsX.list"
+test "$debug" && echo
+test "$debug" && echo $cMd
+cat $mcsX | tr \(\) :: \
+  | awk -F":" '/^\+.*SYSLIB/ {printf("%-8s %-8s\n",$4,$2)}' | sort \
+  > $mcsX.list
+# no error trapping (for last pipe anyway)
+
+# parse parts.txt and keep SYSLIB name & part name, sorted
+# sample input:
+# SZWESAMP ZWE1SMPE 12872  
+# sample output:
+# SZWESAMP ZWE1SMPE
+partsX="$log/$parts"
+# _cmd chokes on multiple quotes
+cMd="awk '{printf(\"%-8s %-8s\n\",$1,$2)}' $partsX 2>&1 > $partsX.list"
+test "$debug" && echo
+test "$debug" && echo $cMd
+awk '{printf("%-8s %-8s\n",$1,$2)}' $partsX 2>&1 > $partsX.list
+status=$?
+
+if test $status -ne 0
+then
+    echo "** ERROR $me '$@' ended with status $sTaTuS"
+  test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
+fi    #
+
+# compare both lists
+test "$debug" && echo
+test "$debug" && echo "test -n \"$(comm -3 $mcsX.list $partsX.list)\""
+if test -n "$(comm -3 $mcsX.list $partsX.list)"
+then
+  echo "** ERROR SMPMCS does not match list of actual parts"
+  echo "   these definitions are in $mcsX but the files do not exist"
+  _cmd comm -23 $mcsX.list $partsX.list
+  echo "   these files exist but there is no definition in $mcsX"
+  _cmd comm -13 $mcsX.list $partsX.list
+  _cmd rm -f $mcsX.list $partsX.list
+  test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
+else
+  test "$debug" && echo "SMPMCS matches staged files"  
+fi    #  
+
+# cleanup
+test -f $mcsX.list && _cmd rm -f $mcsX.list
+test -f $partsX.list && _cmd rm -f $partsX.list
+
+test "$debug" && echo "< _verify"
+}    # _verify
+
+# ---------------------------------------------------------------------
 # --- copy MVS members defined in $list to specified data set
 # $1: input data set name
 # $2: output data set name
@@ -378,13 +450,11 @@ echo "-- input MVS: $mvsI"
 echo "-- input USS: $ussI"
 echo "-- output:    $mcsHlq"
 
-# create SMP/E installable FMID
-
-# TODO act upon parts delta (created by smpe-split.sh)
-# - less parts requires explicit approval by build engineer
-# - more parts results in warning mail to build engineer
-
+# ensure SMPMCS matches RELFILE content
+_verify
+# create RELFILEs
 _relFiles
+# create SMPMCS
 _smpmcs
 
 echo "-- completed $me 0"

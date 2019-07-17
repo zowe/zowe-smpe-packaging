@@ -125,15 +125,8 @@ do
   _move $stage $split/$file echo $d
 done    # for d
 
-# verify everything is moved
-echo "-- verifying split action"
-orphan=$(ls -A $stage)
-if test "$orphan"
-then
-  echo "** ERROR $me not all files are moved to $split"
-  echo "$orphan"                          # quotes preserve line breaks
-  test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
-fi    #
+# verify everything moved correctly
+_verify
 
 # ensure we have at least the same number of pax files as previous run
 test "$debug" && echo "$cnt ?< $prevCnt"
@@ -205,6 +198,117 @@ test "$DEL" && _cmd rmdir $1
 
 test "$debug" && echo "< _move"
 }    # _move
+
+# ---------------------------------------------------------------------
+# --- verify that split moved everything correctly
+# ---------------------------------------------------------------------
+function _verify
+{
+test "$debug" && echo && echo "> _verify $@"
+
+# verify everything is moved
+echo "-- verifying split action"
+orphan=$(ls -A $stage)
+if test "$orphan"
+then
+  echo "** ERROR $me not all files are moved to $split"
+  echo "$orphan"                          # quotes preserve line breaks
+  test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
+fi    #
+
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+# verify directory structure is intact
+echo "-- verifying split output"
+
+# 1. get original directory layout from manifest
+# sample input:
+# #USS drwxr-xr-x ++++ ./admin . . 8192
+# #USS -rwxr-xr-x --s- ./admin/zowe-configure.sh . . 15658
+# sample output:
+# manifest ./admin
+# manifest ./admin/zowe-configure.sh
+cMd="awk '/^#USS/ {printf(\"manifest %s\n\",$4)}' $log/$manifest"
+cMd="$cMd 2>&1 > $stage/manifest.list"
+test "$debug" && echo
+test "$debug" && echo "$cMd"
+awk '/^#USS/ {printf("manifest %s\n",$4)}' $log/$manifest \
+  2>&1 > $stage/manifest.list
+test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                     # EXIT
+
+# 2. get removed symlinks layout from manifest                          
+# sample input:                                                         
+# #LNK ./jes_explorer/node_modules/.bin/which -> ../which/bin/which     
+# sample output:                                                        
+# symlinks ./jes_explorer/node_modules/.bin/which                       
+cMd="awk '/^#LNK/ {printf(\"symlinks %s\n\",$2)}' $log/$manifest | sort"
+cMd="$cMd 2>&1 > $stage/symlink.list"                                   
+test "$debug" && echo                                                   
+test "$debug" && echo "$cMd"                                            
+awk '/^#LNK/ {printf("symlinks %s\n",$2)}' $log/$manifest | sort \      
+  2>&1 > $stage/symlink.list                                            
+test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                     # EXIT 
+
+# 3. get actual directory layout from staging area
+# sample input:
+# /BLD/AZWE001/split
+# /BLD/AZWE001/split/ZWEPAX03
+# /BLD/AZWE001/split/ZWEPAX03/admin
+# /BLD/AZWE001/split/ZWEPAX03/adminzowe-configure.sh
+# sample output:
+# ZWEPAX03 ./admin
+# ZWEPAX03 ./admin/zowe-configure.sh
+# sed will
+# - remove base directory
+# ->
+#    /ZWEPAX03
+#    /ZWEPAX03/admin
+#    /ZWEPAX03/adminzowe-configure.sh
+# - remove first / (in 2 steps so base dir line is also removed)
+# ->
+#    ZWEPAX03
+#    ZWEPAX03/admin
+#    ZWEPAX03/adminzowe-configure.sh
+# - replace first / with ' ./' and only print lines where this was done
+# -> ZWEPAX03 ./admin
+#    ZWEPAX03 ./adminzowe-configure.sh
+# awk will only keep first part of file names with blanks (manifest is 
+#   positional and does this as well)
+cMd="find $split | sed -n \"s!$split!!;s!/!!;s!/! ./!p\" | sort -k 2"
+cMd="$cMd | awk '{print $1,$2}' 2>&1 > $stage/split.list"
+test "$debug" && echo
+test "$debug" && echo "$cMd"
+find $split | sed -n "s!$split!!;s!/!!;s!/! ./!p" | sort -k 2 \
+  | awk '{print $1,$2}' 2>&1 > $stage/split.list
+test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                     # EXIT
+
+# 4. merge the lists sorted by path name and keep unique lines
+_cmd cd $stage
+cMd="sort -m -k 2 manifest.list symlink.list split.list | uniq -u -f 1"
+cMd="$cMd 2>&1 > $stage/uniq.list"
+test "$debug" && echo
+test "$debug" && echo "$cMd"
+sort -m -k 2 manifest.list symlink.list split.list | uniq -u -f 1 \
+  2>&1 > $stage/uniq.list
+test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                     # EXIT
+_cmd --null cd -
+
+# 5. there should be no unique lines
+if test -s $stage/uniq.list
+then
+  echo "** ERROR split mangled the output directory structure"
+  cat $stage/uniq.list
+  test $? -ne 0 -a ! "$IgNoRe_ErRoR" && exit 8                   # EXIT
+else
+  test "$debug" && echo "directory structure is maintained"
+fi    #
+
+_cmd cd $stage
+_cmd rm manifest.list symlink.list split.list uniq.list
+_cmd --null cd -
+
+test "$debug" && echo "< _verify"
+}    # _verify
 
 # ---------------------------------------------------------------------
 # --- build manifest
@@ -930,6 +1034,9 @@ manifest=${mask}.${date}.${tail}                     # manifest file
 # show input/output details
 echo "-- input:  $stage"
 echo "-- output: $ussI"
+
+# do not pack install log
+test -e $ZOWE_ROOT_DIR/install_log && _cmd rm -rf $ZOWE_ROOT_DIR/install_log
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
