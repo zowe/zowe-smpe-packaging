@@ -181,7 +181,7 @@ test "$debug" && echo "< _gimzip"
 # --- create SYSIN metadata for GIMZIP & GIMUNZIP
 # GIMZIP sample:
 # <GIMZIP description="Zowe Open Source Project">
-# <FILEDEF type="SMPPTFIN" archid="SMPMCS"
+# <FILEDEF type="SMPPTFIN" archid="AZWE001.SMPMCS"
 #          name="BLD.ZOWE.AZWE001.SMPMCS"/>
 # <FILEDEF type="SMPRELF"  archid="AZWE001.F1"
 #          name="BLD.ZOWE.AZWE001.F1"/>
@@ -189,7 +189,7 @@ test "$debug" && echo "< _gimzip"
 #
 # GIMUNZIP sample:
 # <GIMUNZIP>
-# <ARCHDEF archid="SMPMCS"
+# <ARCHDEF archid="AZWE001.SMPMCS"
 #          newname="@PREFIX@.ZOWE.AZWE001.SMPMCS"/>
 # <ARCHDEF archid="AZWE001.F1"
 #          newname="@PREFIX@.ZOWE.AZWE001.F1"/>
@@ -245,7 +245,7 @@ fi    #
 _cmd --repl $scratch/$sysinGimzip \
   echo "<GIMZIP description=\"$product\">"
 _cmd --save $scratch/$sysinGimzip \
-  echo "<FILEDEF type=\"SMPPTFIN\" archid=\"SMPMCS\""
+  echo "<FILEDEF type=\"SMPPTFIN\" archid=\"${FMID}.SMPMCS\""
 _cmd --save $scratch/$sysinGimzip \
   echo "         name=\"$mcs\"/>"
 
@@ -253,7 +253,7 @@ _cmd --save $scratch/$sysinGimzip \
 _cmd --repl $scratch/$sysinGimunzip \
   echo "<GIMUNZIP>"
 _cmd --save $scratch/$sysinGimunzip \
-  echo "<ARCHDEF archid=\"SMPMCS\""
+  echo "<ARCHDEF archid=\"${FMID}.SMPMCS\""
 _cmd --save $scratch/$sysinGimunzip \
   echo "         newname=\"@PREFIX@.${RFDSNPFX}.${FMID}.SMPMCS\"/>"
 
