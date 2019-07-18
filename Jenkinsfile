@@ -20,7 +20,7 @@ node('ibm-jenkins-slave-nvm') {
 
   pipeline.setup(
     packageName : 'org.zowe.smpe',
-    version     : '1.3.5',
+    version     : '2.0.0',
     github: [
       email                      : lib.Constants.DEFAULT_GITHUB_ROBOT_EMAIL,
       usernamePasswordCredential : lib.Constants.DEFAULT_GITHUB_ROBOT_CREDENTIAL,
