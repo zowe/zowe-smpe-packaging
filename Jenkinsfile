@@ -65,8 +65,7 @@ node('ibm-jenkins-slave-nvm') {
           job             : "zowe-smpe-packaging",
           filename        : 'zowe-smpe.pax',
           environments    : [ 'ZOWE_VERSION': pipeline.getVersion() ],
-          extraFiles      : 'readme.txt,rename-back.sh',
-          keepTempFolder  : true
+          extraFiles      : 'readme.txt,rename-back.sh'
       )
       // rename to correct suffix
       sh "cd .pax && chmod +x rename-back.sh && cat rename-back.sh && ./rename-back.sh"
