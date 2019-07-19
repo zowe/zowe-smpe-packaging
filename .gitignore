@@ -7,3 +7,10 @@ tmp/
 
 # Mac files
 .DS_Store
+
+# pax workspace
+.pax/*
+!.pax/.keep
+!.pax/pre-packaging.sh
+!.pax/post-packaging.sh
+!.pax/prepare-workspace.sh
