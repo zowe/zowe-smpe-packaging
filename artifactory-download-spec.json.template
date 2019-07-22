@@ -1,6 +1,6 @@
 {
   "files": [{
-      "pattern": "libs-snapshot-local/org/zowe/1.3.0-STAGING/zowe-1.3.*.pax",
+      "pattern": "libs-snapshot-local/org/zowe/1.4.0-STAGING/zowe-1.4.*.pax",
       "target": ".pax/",
       "flat": "true",
        "sortBy": ["created"],
