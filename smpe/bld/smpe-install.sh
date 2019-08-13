@@ -169,7 +169,18 @@ opts="$opts -I"                                # Install only - no config
 #opts="$opts -i $stage"                         # target directory
 #opts="$opts -h $mvsI"                          # target HLQ
 #opts="$opts -f $log/$logFile"                  # install log
+# FIXME: since the installation will update .zowe_profile, to avoid affecting
+#        existing installation of Zowe, we backup .zowe_profile and restore
+#        later. - jack
+# Question, if the installation failed and exit, will the backup be restored?
+rm -fr ~/.zowe_profile_smpe_packaging_backup
+if [ -f "~/.zowe_profile" ]; then
+  mv ~/.zowe_profile ~/.zowe_profile_smpe_packaging_backup
+fi
 _cmd sh -c "$extract/$prodScript $opts"
+if [ -f "~/.zowe_profile_smpe_packaging_backup" ]; then
+  mv ~/.zowe_profile_smpe_packaging_backup ~/.zowe_profile
+fi
 
 #For debug
 ls -al $stage
