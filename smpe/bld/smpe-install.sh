@@ -177,7 +177,7 @@ rm -fr ~/.zowe_profile_smpe_packaging_backup
 if [ -f "~/.zowe_profile" ]; then
   mv ~/.zowe_profile ~/.zowe_profile_smpe_packaging_backup
 fi
-_cmd sh -c "$extract/$prodScript $opts"
+_cmd sh -c "$extract/$prodScript $opts" </dev/null
 if [ -f "~/.zowe_profile_smpe_packaging_backup" ]; then
   mv ~/.zowe_profile_smpe_packaging_backup ~/.zowe_profile
 fi
