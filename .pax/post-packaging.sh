@@ -59,7 +59,7 @@ echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
 mkdir -p zowe
 
-./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v ${FMID_VERISON} -r "${CURR_PWD}/zowe"
+./bld/smpe.sh -i "${CURR_PWD}/${INPUT_TXT}" -v ${FMID_VERISON} -r "${CURR_PWD}/zowe" -d
 
 # get the final build result
 ZOWE_SMPE_PAX="${CURR_PWD}/zowe/AZWE${FMID_VERISON}/gimzip/AZWE${FMID_VERISON}.pax.Z"
