@@ -18,6 +18,15 @@ node('ibm-jenkins-slave-nvm') {
 
   pipeline.admins.add("jackjia")
 
+  // we have extra parameters for integration test
+  pipeline.addBuildParameter(
+    booleanParam(
+      name: 'KEEP_TEMP_FOLDER',
+      description: 'If leave the temporary packaging folder on remote server.',
+      defaultValue: false
+    )
+  )
+
   pipeline.setup(
     packageName : 'org.zowe.smpe',
     version     : '1.4.0',
@@ -65,7 +74,8 @@ node('ibm-jenkins-slave-nvm') {
           job             : "zowe-smpe-packaging",
           filename        : 'zowe-smpe.pax',
           environments    : [ 'ZOWE_VERSION': pipeline.getVersion() ],
-          extraFiles      : 'readme.txt,rename-back.sh'
+          extraFiles      : 'readme.txt,rename-back.sh',
+          keepTempFolder  : params.KEEP_TEMP_FOLDER
       )
       // rename to correct suffix
       sh "cd .pax && chmod +x rename-back.sh && cat rename-back.sh && ./rename-back.sh"
