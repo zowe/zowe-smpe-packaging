@@ -54,7 +54,7 @@ cfgScript=get-config.sh        # script to read smpe.yaml config data
 here="$( cd "$(dirname "$0")" ; pwd -P )"             # script location
 me=$(basename $0)              # script name
 #debug=-d                      # -d or null, -d triggers early debug
-#IgNoRe_ErRoR=1                # no exit on error when not null  #debug
+IgNoRe_ErRoR=1                # no exit on error when not null  #debug
 #set -x                                                          #debug
 # more defaults defined later, search for "date="
 
@@ -209,6 +209,7 @@ test "$debug" && echo && echo "> _verify $@"
 # verify everything is moved
 echo "-- verifying split action"
 orphan=$(ls -A $stage)
+ls -l $stage
 if test "$orphan"
 then
   echo "** ERROR $me not all files are moved to $split"
