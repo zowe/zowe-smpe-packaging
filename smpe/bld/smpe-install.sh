@@ -607,10 +607,10 @@ fi    # delete data sets
 
 echo "---" JAD added the line below to create the PROCLIB PDS
 ls $here
-ls $here/scripts
+ls $here/../content/scripts
 allocScript=allocate-dataset.sh
-find $here -name $allocScript
-$here/scripts/$allocScript PROCLIB "FB" "80" "PO" "1,2"
+find $here/.. -name $allocScript
+$here/../content/scripts/$allocScript PROCLIB "FB" "80" "PO" "1,2"
 
 # stage data
 if test "$in"
