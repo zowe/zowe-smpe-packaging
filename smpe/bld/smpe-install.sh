@@ -9,7 +9,7 @@
 #
 # Copyright Contributors to the Zowe Project. 2019, 2019
 #######################################################################
- 
+# 
 #% stage Zowe product for SMP/E packaging
 #%
 #% -?                 show this help message
