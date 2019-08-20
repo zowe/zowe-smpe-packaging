@@ -605,7 +605,8 @@ then
   done    # for dsn
 fi    # delete data sets
 
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+# JAD added the line below to create the PROCLIB PDS
+$here/scripts/$allocScript PROCLIB "FB" "80" "PO" "10,2"
 
 # stage data
 if test "$in"
@@ -635,7 +636,8 @@ _cmd chmod -R 755 $stage
 # log dir exists if somebody used our input for install, trash it
 test -d $stage/log       && _cmd rm -rf $stage/log
 test -d $stage/setup_log && _cmd rm -rf $stage/setup_log
-
+# JAD added the line below to delete the ZOWESVR.JCL file
+rm $stage/ZOWESVR.JCL
 # do not clean up $stage, needed by other scripts
 
 echo "-- completed $me 0"
