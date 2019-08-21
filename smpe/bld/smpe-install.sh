@@ -605,13 +605,11 @@ then
   done    # for dsn
 fi    # delete data sets
 
-echo "---" JAD added the line below to create the PROCLIB PDS
-ls $here
-ls $here/../content/scripts
+echo "---" JAD added the lines below to create the PROCLIB PDS
 allocScript=allocate-dataset.sh
-find $here/.. -name $allocScript
 $here/../content/scripts/$allocScript PROCLIB "FB" "80" "PO" "1,2"
-
+echo "---" JAD prove that we created the PROCLIB
+datasets=$($here/$csiScript "${mvsI}.**")
 # stage data
 if test "$in"
 then
