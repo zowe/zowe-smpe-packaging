@@ -174,6 +174,9 @@ cat $mcsX | tr \(\) :: \
 # sample output:
 # SZWESAMP ZWE1SMPE
 partsX="$log/$parts"
+echo "---" JAD here is partsX
+cat $partsX
+echo "---" JAD end of  partsX
 # _cmd chokes on multiple quotes
 cMd="awk '{printf(\"%-8s %-8s\n\",$1,$2)}' $partsX 2>&1 > $partsX.list"
 test "$debug" && echo
