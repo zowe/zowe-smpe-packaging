@@ -605,17 +605,24 @@ then
   done    # for dsn
 fi    # delete data sets
 
-echo "---" JAD added the lines below to create the PROCLIB PDS
-allocScript=allocate-dataset.sh
-$here/../content/scripts/$allocScript ${mvsI}.PROCLIB "FB" "80" "PO" "1,2"
-echo "---" JAD prove that we created the PROCLIB
-$here/$csiScript "${mvsI}.**"
-echo "---" JAD end of list of "${mvsI}.**" datasets
+
 # stage data
 if test "$in"
 then
   _findInput
+  
+  echo "---" JAD added the lines below to create the PROCLIB PDS
+  allocScript=allocate-dataset.sh
+  $here/../content/scripts/$allocScript ${mvsI}.PROCLIB "FB" "80" "PO" "1,2"
+  echo "---" JAD prove that we created the PROCLIB
+  $here/$csiScript "${mvsI}.**"
+  echo "---" JAD end of list of "${mvsI}.**" datasets
+  
   _install            # creates $Stage, must run before other _install*
+  
+  echo "---" JAD now delete PROCLIB
+  tsocmd "DELETE '${mvsI}.PROCLIB'"
+  
   _installSMPE
   _installOther
   _clearLog
