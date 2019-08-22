@@ -174,11 +174,11 @@ opts="$opts -I"                                # Install only - no config
 #        later. - jack
 # Question, if the installation failed and exit, will the backup be restored?
 rm -fr ~/.zowe_profile_smpe_packaging_backup
-if [ -f "~/.zowe_profile" ]; then
+if [ -f ~/.zowe_profile ]; then
   mv ~/.zowe_profile ~/.zowe_profile_smpe_packaging_backup
 fi
-_cmd $extract/$prodScript $opts
-if [ -f "~/.zowe_profile_smpe_packaging_backup" ]; then
+_cmd $extract/$prodScript $opts </dev/null
+if [ -f ~/.zowe_profile_smpe_packaging_backup ]; then
   mv ~/.zowe_profile_smpe_packaging_backup ~/.zowe_profile
 fi
 
