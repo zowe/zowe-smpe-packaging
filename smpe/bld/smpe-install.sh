@@ -155,7 +155,7 @@ test "$alter" && _cmd $alter $debug PROD $extract
 echo "-- Updating yaml file"
 CI_ZOWE_CONFIG_FILE=$extract/install/zowe-install.yaml
 sed -e "/^install:/,\$s#rootDir=.*\$#rootDir=$stage#" \
-  -e "/^zowe-server-proclib:/,\$s#dsName=.*\$#dsName=$auto#" \
+  -e "/^zowe-server-proclib:/,\$s#dsName=.*\$#dsName=auto#" \
   "${CI_ZOWE_CONFIG_FILE}" \
   > "${CI_ZOWE_CONFIG_FILE}.tmp" 
 mv "${CI_ZOWE_CONFIG_FILE}.tmp" "${CI_ZOWE_CONFIG_FILE}"
