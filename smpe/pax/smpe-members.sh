@@ -251,6 +251,7 @@ echo "-- output USS: $ussI"
 
 # install SZWESAMP members
 list=""     # file names include path based on $here
+list="$list MVS/ZWE0CLN.jcl"
 list="$list MVS/ZWE1SMPE.jcl"
 list="$list MVS/ZWE2RCVE.jcl"
 list="$list MVS/ZWE3ALOC.jcl"
