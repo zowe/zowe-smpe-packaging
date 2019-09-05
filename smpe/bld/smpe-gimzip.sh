@@ -123,10 +123,10 @@ function runJob {
             # ... $HASP890 JOB(JOB1)      CC=(COMPLETED,RC=0)  <-- accept this value
             # ... $HASP890 JOB(GIMUNZIP)  CC=()  <-- reject this value
         
-        grep "$HASP890 JOB(.*)  CC=(.*)" /tmp/dj.$$.cc > /dev/null
+        grep "$HASP890 JOB(.*) *CC=(.*)" /tmp/dj.$$.cc > /dev/null
         if [[ $? -eq 0 ]]
         then
-            jobname=`sed -n "s/.*$HASP890 JOB(\(.*\))  CC=(.*).*/\1/p" /tmp/dj.$$.cc`
+            jobname=`sed -n "s/.*$HASP890 JOB(\(.*\)) *CC=(.*).*/\1/p" /tmp/dj.$$.cc`
             if [[ ! -n "$jobname" ]]
             then
                 jobname=empty
@@ -178,30 +178,14 @@ echo     gimzipParm = \"$gimzipParm\"
 echo     gimzipHlq = \"$gimzipHlq\" 
 echo     gimzip = \"$gimzip\" 
 
-ls -l $here/gimzip.jcl
-cat   $here/gimzip.jcl
-# cat > ./gimzip.jcl <<EndOfJcl
-# //GIMZIP   JOB
-# //GIMZIP   EXEC PGM=GIMZIP,PARM='#gimzipParm',REGION=0M,COND=(0,LT)
-# //*STEPLIB  DD DISP=SHR,DSN=SYS1.MIGLIB
-# //SYSUT2   DD UNIT=SYSALLDA,SPACE=(CYL,(200,100))
-# //SYSUT3   DD UNIT=SYSALLDA,SPACE=(CYL,(50,10))
-# //SYSUT4   DD UNIT=SYSALLDA,SPACE=(CYL,(25,5))
-# //SMPOUT   DD DISP=SHR,DSN=#gimzipHlq.SMPOUT
-# //SYSPRINT DD DISP=MOD,DSN=#gimzipHlq.SYSPRINT
-# //SMPDIR   DD PATHDISP=KEEP,PATH='#dir/SMPDIR'    package directory
-# //SMPCPATH DD PATHDISP=KEEP,PATH='#dir/SMPCPATH'  smp classes directory
-# //SMPJHOME DD PATHDISP=KEEP,PATH='#dir/SMPJHOME'  java runtime directory
-# //SMPWKDIR DD PATHDISP=KEEP,PATH='#dir/SMPWKDIR'  work directory
-# //SYSIN    DD DISP=SHR,DSN=#gimzipHlq.SYSIN       package control tags
-# EndOfJcl
-
-# ls -l ./gimzip.jcl
+ln -s $gimzip /tmp/gimzip.$$  # otherwise it's too long for JCL
+echo link is
+ls -l /tmp/gimzip.$$
 
 sed "\
     s:#gimzipParm:$gimzipParm:; \
     s:#gimzipHlq:$gimzipHlq:; \
-    s:#dir:$gimzip:; \
+    s:#dir:/tmp/gimzip.$$:; \
     "\
     $here/gimzip.jcl > $here/gimzip.sed.jcl
 
