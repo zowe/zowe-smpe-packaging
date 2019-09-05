@@ -87,7 +87,7 @@ test "$debug" && echo gimzipParm=$gimzipParm
 SCRIPT_DIR=`pwd`
 SCRIPT="$(basename $0)"
 operdir=$SCRIPT_DIR         # this is where opercmd should be available
-operdir=.
+operdir=$here
 function runJob {
 
     echo; echo $SCRIPT function runJob started
