@@ -174,12 +174,12 @@ function runJob {
 }
 
 echo  $SCRIPT editing gimzip.jcl
-echo     gimzipParm = $gimzipParm 
-echo     gimzipHlq = $gimzipHlq 
-echo     gimzip = $gimzip 
+echo     gimzipParm = \"$gimzipParm\" 
+echo     gimzipHlq = \"$gimzipHlq\" 
+echo     gimzip = \"$gimzip\" 
 
-ls -l ./gimzip.jcl
-cat   ./gimzip.jcl
+ls -l $here/gimzip.jcl
+cat   $here/gimzip.jcl
 # cat > ./gimzip.jcl <<EndOfJcl
 # //GIMZIP   JOB
 # //GIMZIP   EXEC PGM=GIMZIP,PARM='#gimzipParm',REGION=0M,COND=(0,LT)
@@ -203,10 +203,10 @@ sed "\
     s:#gimzipHlq:$gimzipHlq:; \
     s:#dir:$gimzip:; \
     "\
-    ./gimzip.jcl > ./gimzip.sed.jcl
+    $here/gimzip.jcl > $here/gimzip.sed.jcl
 
 # Run the GIMZIP job
-runJob ./gimzip.sed.jcl
+runJob $here/gimzip.sed.jcl
 gimzipRC=$?
 
 # give z/OS time to free the data sets before accessing them again
