@@ -178,11 +178,31 @@ echo     gimzipParm = $gimzipParm
 echo     gimzipHlq = $gimzipHlq 
 echo     gimzip = $gimzip 
 
+ls -l ./gimzip.jcl
+cat   ./gimzip.jcl
+# cat > ./gimzip.jcl <<EndOfJcl
+# //GIMZIP   JOB
+# //GIMZIP   EXEC PGM=GIMZIP,PARM='#gimzipParm',REGION=0M,COND=(0,LT)
+# //*STEPLIB  DD DISP=SHR,DSN=SYS1.MIGLIB
+# //SYSUT2   DD UNIT=SYSALLDA,SPACE=(CYL,(200,100))
+# //SYSUT3   DD UNIT=SYSALLDA,SPACE=(CYL,(50,10))
+# //SYSUT4   DD UNIT=SYSALLDA,SPACE=(CYL,(25,5))
+# //SMPOUT   DD DISP=SHR,DSN=#gimzipHlq.SMPOUT
+# //SYSPRINT DD DISP=MOD,DSN=#gimzipHlq.SYSPRINT
+# //SMPDIR   DD PATHDISP=KEEP,PATH='#dir/SMPDIR'    package directory
+# //SMPCPATH DD PATHDISP=KEEP,PATH='#dir/SMPCPATH'  smp classes directory
+# //SMPJHOME DD PATHDISP=KEEP,PATH='#dir/SMPJHOME'  java runtime directory
+# //SMPWKDIR DD PATHDISP=KEEP,PATH='#dir/SMPWKDIR'  work directory
+# //SYSIN    DD DISP=SHR,DSN=#gimzipHlq.SYSIN       package control tags
+# EndOfJcl
+
+# ls -l ./gimzip.jcl
+
 sed "\
-    s/#gimzipParm/$gimzipParm/; \
-    s/#gimzipHlq/$gimzipHlq/; \
-    s/#dir/$gimzip/; \
-    " \
+    s:#gimzipParm:$gimzipParm:; \
+    s:#gimzipHlq:$gimzipHlq:; \
+    s:#dir:$gimzip:; \
+    "\
     ./gimzip.jcl > ./gimzip.sed.jcl
 
 # Run the GIMZIP job
