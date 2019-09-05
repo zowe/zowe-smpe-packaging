@@ -69,6 +69,15 @@ echo "-- preparing GIMZIP"
 # create metadata describing what GIMZIP & GIMUNZIP must process
 _gimzipMeta
 
+echo list before linking
+ls -l $SMPCPATH 
+ls -l $SMPJHOME 
+ls -l $1
+
+_ln $SMPCPATH $scratch/SMPCPATH
+_ln $SMPJHOME $scratch/SMPJHOME
+_ln $1        $scratch/SMPDIR
+
 # allocate & populate data sets used by GIMZIP
 # note: GIMZIP assumes FB80 for SYSIN and will abend if this is not so
 # note: GIMZIP assumes FBA121 for output and does not write \n, so
@@ -181,6 +190,8 @@ echo     gimzip = \"$gimzip\"
 ln -s $gimzip /tmp/gimzip.$$  # otherwise it's too long for JCL
 echo link is
 ls -l /tmp/gimzip.$$
+ls -l $gimzip/SMPDIR
+ls -l /tmp/gimzip.$$/SMPDIR 
 
 sed "\
     s:#gimzipParm:$gimzipParm:; \
