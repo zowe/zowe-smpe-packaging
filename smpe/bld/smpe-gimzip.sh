@@ -74,6 +74,10 @@ ls -l $SMPCPATH
 ls -l $SMPJHOME 
 ls -l $1
 
+echo  SMPCPATH $SMPCPATH 
+echo  SMPJHOME $SMPJHOME 
+echo  1 $1
+
 _ln $SMPCPATH $scratch/SMPCPATH
 _ln $SMPJHOME $scratch/SMPJHOME
 _ln $1        $scratch/SMPDIR
