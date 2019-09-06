@@ -191,7 +191,7 @@ echo     gimzipParm = \"$gimzipParm\"
 echo     gimzipHlq = \"$gimzipHlq\" 
 echo     gimzip = \"$gimzip\" 
 
-ln -s $gimzip /tmp/gimzip.$$  # otherwise it's too long for JCL
+ln -s $1 /tmp/gimzip.$$  # otherwise it's too long for JCL
 echo link is
 ls -l /tmp/gimzip.$$
 ls -l $gimzip/SMPDIR
