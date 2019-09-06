@@ -94,7 +94,7 @@ _ln $1        $scratch/SMPDIR
 _alloc "${gimzipHlq}.SMPOUT"   "FBA" "121" "PS" "1,1"
 _alloc "${gimzipHlq}.SYSPRINT" "FBA" "121" "PS" "1,1"
 _alloc "${gimzipHlq}.SYSIN"    "FB"   "80" "PS" "1,1"
-_cmd cp $ROOT/work/$sysinGimzip "//'${gimzipHlq}.SYSIN'"
+_cmd cp $ROOT/work/gimzip/AZWE001/$sysinGimzip "//'${gimzipHlq}.SYSIN'"
 
 # any supported EXEC PGM=GIMZIP,PARM='...' parameter
 gimzipParm=''
@@ -195,7 +195,7 @@ echo     gimzipParm = \"$gimzipParm\"
 echo     gimzipHlq = \"$gimzipHlq\" 
 echo     gimzip = \"$gimzip\" 
 
-ln -s $ROOT/work /tmp/gimzip.$$  # otherwise it's too long for JCL
+ln -s $ROOT/work/gimzip/AZWE001 /tmp/gimzip.$$  # otherwise it's too long for JCL
 echo link is
 ls -l /tmp/gimzip.$$
 ls -l $gimzip/SMPDIR
