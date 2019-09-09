@@ -212,6 +212,8 @@ sed "\
     "\
     $here/gimzip.jcl > $here/gimzip.sed.jcl
 
+mkdir -p /tmp/gimzip.$$/SMPWKDIR # THE SMPWKDIR DD STATEMENT MUST BE ALLOCATED TO A DIRECTORY
+
 # Run the GIMZIP job
 runJob $here/gimzip.sed.jcl
 gimzipRC=$?
