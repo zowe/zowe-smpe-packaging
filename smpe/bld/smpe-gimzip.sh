@@ -136,7 +136,7 @@ function runJob {
 
     # wait for job to finish
     jobdone=0
-    for secs in 1 5 10 30 100 300 500
+    for secs in 5 100 100 100 100 100 100 100 100 100 100
     do
         sleep $secs
         $operdir/opercmd "\$DJ${jobid},CC" > /tmp/dj.$$.cc
@@ -359,6 +359,7 @@ _cmd --save $scratch/$sysinGimzip echo "</GIMZIP>"
 _cmd --save $scratch/$sysinGimunzip echo "</GIMUNZIP>"
 
 test "$debug" && cat $scratch/$sysinGimzip
+cat $scratch/$sysinGimzip   # collect it for posterity
 test "$debug" && cat $scratch/$sysinGimunzip
 
 test "$debug" && echo "< _gimzipMeta"
