@@ -36,8 +36,8 @@
 extraTracks=90                 # add extra tracks to extract zFS size
 product='Zowe Open Source Project'  # product name (max. 67 chars)
 #        ----+----1----+----2----+----3----+----4----+----5----+----6----+--
-crastartLog=crastart.log       # CRASTART execution log
-crastartConf=crastart.conf     # generic CRASTART config file
+# crastartLog=crastart.log       # CRASTART execution log
+# crastartConf=crastart.conf     # generic CRASTART config file
 readme=gimzip.readme.txt       # generic GIMZIP readme file
 extractSize=extract-size.txt   # save required zFS size for PD creation
 smpout=gimzip.smpout.log       # GIMZIP SMPOUT log
@@ -245,7 +245,7 @@ then                                       # GIMZIP failure
 elif test "$debug"                                     # GIMZIP success
 then
   echo "GIMZIP successful"
-  _cmd cat $log/$crastartLog
+  # _cmd cat $log/$crastartLog
   _cmd cat $log/$sysprint
   _cmd cat $log/$smpout
 fi    #
