@@ -1,3 +1,4 @@
+@John-A-Davies
 #!/bin/sh
 #######################################################################
 # This program and the accompanying materials are made available
@@ -59,33 +60,45 @@ test "$debug" && echo && echo "> $me $@"
 # ---------------------------------------------------------------------
 # --- invoke GIMZIP to create pax files & metadata for SMPMCS & RELFILEs
 # $1: GIMZIP output directory
+#
+# GIMZIP is created for MVS batch invocation. We are using CRASTART,
+# part of IBM Developer for z Systems, to create this environment.
+# For this, CRASTART uses a config file, which acts very much like a
+# simple JCL. DDs are defined and a program to execute is specified.
+#
+# documentation in "SMP/E for z/OS Reference (SA23-2276)" and
+# "IBM Developer for z Systems Host Configuration Guide (SC27-8577)"
+#
+# user must be authorized to use this utility:
+# - SYS1.MIGLIB(GIMZIP) packaging service routine
+# - FEK.SFEKLPA(CRASTART) CARMA startup utility
+#   (mapped in USS to /usr/lpp/IBM/idz/bin/CRASTART)
 # ---------------------------------------------------------------------
 function _gimzip
 {
 test "$debug" && echo && echo "> _gimzip $@"
 
-echo "-- preparing GIMZIP"
+echo "-- invoking GIMZIP"
+
+if test ! -e "$CRASTART"
+then
+  echo "** ERROR $me cannot execute: $CRASTART"
+  echo "ls -ld \"$CRASTART\""; ls -ld "$CRASTART"
+  test ! "$IgNoRe_ErRoR" && exit 8                               # EXIT
+fi    #
 
 # create metadata describing what GIMZIP & GIMUNZIP must process
 _gimzipMeta
 
-echo list before linking
-ls -al $SMPCPATH 
-ls -al $SMPJHOME 
-echo perform ls -al $1
-ls -al $1
-echo finished ls -al $1
+# create customized config file used by CRASTART to run GIMZIP
+_cmd --repl $scratch/$crastartConf \
+  sed "s!#dir!$scratch!g;s/#fmid/$FMID/g;s/#hlq/$gimzipHlq/g" \
+    $here/$crastartConf
+test "$debug" && cat $scratch/$crastartConf
 
-echo  SMPCPATH $SMPCPATH 
-echo  SMPJHOME $SMPJHOME 
-echo  1 $1
-
-echo ROOT $ROOT
-ls $ROOT
-
-echo scratch $scratch
-ls -al $scratch 
-
+# CRASTART is not designed to handle lowercase paths, so create
+# uppercase symbolic links (assumes $scratch is all uppercase)
+# KEEP IN SYNC WITH $here/$crastartConf
 _ln $SMPCPATH $scratch/SMPCPATH
 _ln $SMPJHOME $scratch/SMPJHOME
 _ln $1        $scratch/SMPDIR
@@ -100,121 +113,29 @@ _alloc "${gimzipHlq}.SYSPRINT" "FBA" "121" "PS" "1,1"
 _alloc "${gimzipHlq}.SYSIN"    "FB"   "80" "PS" "1,1"
 _cmd cp $scratch/$sysinGimzip "//'${gimzipHlq}.SYSIN'"
 
+# set CRASTART log level (always All so we can parse GIMZIP RC message)
+# A (All):       all trace messages
+# P (Partial):   only connect, disconnect and error messages
+# anything else: only error messages
+crastartLogLevel="All"
+test "$debug" && echo crastartLogLevel=$crastartLogLevel
+
+# STEPLIB is in use by the CRASTART invocation, so tell CRASTART to
+# treat DD TASKLIB as STEPLIB for GIMZIP
+crastartTaskLibDD='TASKLIB'
+test "$debug" && echo crastartTaskLibDD=$crastartTaskLibDD
+
 # any supported EXEC PGM=GIMZIP,PARM='...' parameter
 gimzipParm=''
 test "$debug" && echo gimzipParm=$gimzipParm
 
-# Create GIMZIP JCL
-SCRIPT_DIR=`pwd`
-SCRIPT="$(basename $0)"
-operdir=$SCRIPT_DIR         # this is where opercmd should be available
-operdir=$here
-function runJob {
-
-    echo; echo $SCRIPT function runJob started
-    jclname=$1
-
-    echo $SCRIPT jclname=$jclname
-    ls -l $jclname
-
-    # submit the job using the USS submit command
-    submit $jclname > /tmp/submit.job.$$.out
-    if [[ $? -ne 0 ]]
-    then
-        echo $SCRIPT ERROR: submit JCL $jclname failed
-        return 1
-    else
-        echo $SCRIPT INFO: JCL $jclname submitted
-    fi
-
-    # capture JOBID of submitted job
-    jobid=`cat /tmp/submit.job.$$.out \
-        | sed "s/.*JOB JOB\([0-9]*\) submitted.*/\1/"`
-    rm /tmp/submit.job.$$.out 2> /dev/null 
-
-    # echo; echo $SCRIPT JOBID=$jobid
-
-    # wait for job to finish
-    jobdone=0
-    for secs in 1 5 10 30 100 300 500
-    do
-        sleep $secs
-        $operdir/opercmd "\$DJ${jobid},CC" > /tmp/dj.$$.cc
-            # $DJ gives ...
-            # ... $HASP890 JOB(JOB1)      CC=(COMPLETED,RC=0)  <-- accept this value
-            # ... $HASP890 JOB(GIMUNZIP)  CC=()  <-- reject this value
-        
-        grep "$HASP890 JOB(.*) *CC=(.*)" /tmp/dj.$$.cc > /dev/null
-        if [[ $? -eq 0 ]]
-        then
-            jobname=`sed -n "s/.*$HASP890 JOB(\(.*\)) *CC=(.*).*/\1/p" /tmp/dj.$$.cc`
-            if [[ ! -n "$jobname" ]]
-            then
-                jobname=empty
-            fi 
-        else
-            jobname=unknown
-        fi
-        echo $SCRIPT INFO: Checking for completion of jobname $jobname jobid $jobid
-        
-        grep "CC=(..*)" /tmp/dj.$$.cc > /dev/null   # ensure CC() is not empty
-        if [[ $? -eq 0 ]]
-        then
-            jobdone=1
-            break
-        fi
-    done
-    if [[ $jobdone -eq 0 ]]
-    then
-        echo $SCRIPT ERROR: job ${jobid} not run in time
-        return 2
-    else
-        : # echo; echo $SCRIPT job JOB$jobid completed
-    fi
-
-    # jobname=`sed -n 's/.*JOB(\([^ ]*\)).*/\1/p' /tmp/dj.$$.cc`
-    # echo $SCRIPT jobname $jobname
-    
-    $operdir/opercmd "\$DJ${jobid},CC" > /tmp/dj.$$.cc
-    grep RC= /tmp/dj.$$.cc > /dev/null
-    if [[ $? -ne 0 ]]
-    then
-        echo $SCRIPT ERROR: no return code for jobid $jobid
-        return 3
-    fi
-    
-    rc=`sed -n 's/.*RC=\([0-9]*\))/\1/p' /tmp/dj.$$.cc`
-    # echo; echo $SCRIPT return code for JOB$jobid is $rc
-    rm /tmp/dj.$$.cc 2> /dev/null 
-    if [[ $rc -gt 4 ]]
-    then
-        echo $SCRIPT ERROR: job "$jobname(JOB$jobid)" failed, RC=$rc 
-        return 4
-    fi
-    # echo; echo $SCRIPT function runJob ended
-}
-
-echo  $SCRIPT editing gimzip.jcl
-echo     gimzipParm = \"$gimzipParm\" 
-echo     gimzipHlq = \"$gimzipHlq\" 
-echo     gimzip = \"$gimzip\" 
-
-ln -s $scratch /tmp/gimzip.$$  # otherwise it's too long for JCL
-echo link is
-ls -l /tmp/gimzip.$$
-ls -l $gimzip/SMPDIR
-ls -l /tmp/gimzip.$$/SMPDIR 
-
-sed "\
-    s:#gimzipParm:$gimzipParm:; \
-    s:#gimzipHlq:$gimzipHlq:; \
-    s:#dir:/tmp/gimzip.$$:; \
-    "\
-    $here/gimzip.jcl > $here/gimzip.sed.jcl
-
-# Run the GIMZIP job
-runJob $here/gimzip.sed.jcl
-gimzipRC=$?
+# execute CRASTART and tell it to run GIMZIP
+# note: CRASTART invocation is modelled after invocation done by
+# IBM Developer for z Systems in carma.startup.rex
+_cmd --repl $log/$crastartLog "$CRASTART $gimzipParm" \
+  "TASKLIB=$crastartTaskLibDD" \
+  "SYSLOG=$crastartLogLevel" \
+  "FILE=$scratch/$crastartConf"
 
 # give z/OS time to free the data sets before accessing them again
 # cp: FSUM6258 cannot open file "//'...'": EDC5061I An error occurred 
@@ -230,10 +151,16 @@ _cmd cp "//'${gimzipHlq}.SMPOUT'" $log/$smpout
 # failure: CRAD1002W IBMUSER ALLOC DD(SMPCPATH) PATH('/USR/LPP/JAVA/J8.0/BIN')
 #          CRAD1003W IBMUSER DYNALLOC return Hex:FFFF8017 Dec:-32745
 # failure: CRAD1001W IBMUSER GIMZIP  Returned 001000, May be ABEND 001
-
-if [[ $gimzipRC -gt 0 ]]
-then                                       # GIMZIP failure
-  test "$debug" && echo "GIMZIP failure"
+# grep 1 will remove lines without message ID
+# grep 2 will remove all Informational messages, except CRAD0007I
+# grep 3 will remove lines ending in Dec:0 (sign of success)
+# failure if any line is left (non-zero completion or Warning/Error)
+if test "$(cat $log/$crastartLog \
+           | grep ^CRA | grep -v ^CRAD000[^7]I | grep -v Dec:0$)"
+then                                       # CRASTART or GIMZIP failure
+  test "$debug" && echo "CRASTART or GIMZIP failure"
+  echo "-- $crastartLog $(cat $log/$crastartLog | wc -l) line(s)"
+  cat $log/$crastartLog
   echo "-- $sysprint $(cat $log/$sysprint | wc -l) line(s)"
   cat $log/$sysprint
   echo "-- $smpout $(cat $log/$smpout | wc -l) line(s)"
@@ -695,6 +622,7 @@ echo "-- output: $gimzip"
 
 SMPJHOME=$JAVA_HOME                                         # Java home
 SMPCPATH=$SMP_HOME/classes                         # SMP/E Java classes
+CRASTART=$IDZ_HOME/bin/CRASTART                    # CRASTART lmod stub
 
 base=$gimzip/$FMID        # pax, readme & work dir all start with $FMID
 # $scratch must be all uppercase for CRASTART
