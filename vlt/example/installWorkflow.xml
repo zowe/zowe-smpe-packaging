@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workflow xmlns:xsi="http://linux212.lvn.broadcom.net/zosmf/schemas/workflow_v1.xsd">
+<autoTakeOwnership>false</autoTakeOwnership>
+<!-- instance prefix settings -->
+    <workflowInfo>
+        <workflowID scope="none" >zowe-install</workflowID>
+        <workflowDefaultName>Zowe SMP/E Installation</workflowDefaultName>
+        <workflowDescription>The SMP/E installation</workflowDescription>
+        <workflowVersion>1.0</workflowVersion>
+        <vendor>workflowVendor</vendor>
+        <!-- workflow type -->
+        <Provisioning>
+            <productID>ZOWE</productID>
+            <productName>ZOWE</productName>
+            <productVersion>1.5</productVersion>
+            <softwareType>ZOWE</softwareType>
+        </Provisioning>
+    </workflowInfo>
+    <!--variables-->
+    <variable name="csihlq" scope="instance" visibility="public">
+        <label>CSI HLQ</label>
+        <abstract>HLQ for CSI</abstract>
+        <description>CSI HLQ</description>
+        <category>SMPE</category>
+        <!--variableType-->
+        <string valueMustBeChoice="false" multiLine="false">            
+            <!-- Specify choices here -->
+            <default>ZOWE</default>
+        </string>
+    </variable>
+    <variable name="hlq" scope="instance" visibility="public">
+        <label>HLQ for RFPREFIX</label>
+        <abstract>HLQ for RFPREFIX</abstract>
+        <description>HLQ for RFPREFIX</description>
+        <category>SMPE</category>
+        <!--variableType-->
+        <string valueMustBeChoice="false" multiLine="false">            
+            <!-- Specify choices here -->
+            <default>ZOWE</default>
+        </string>
+    </variable>
+    <variable name="csivol" scope="instance" visibility="public">
+        <label>CSI volume</label>
+        <abstract>CSI volume</abstract>
+        <description>CSI volume</description>
+        <category>SMPE</category>
+        <!--variableType-->
+        <string valueMustBeChoice="false" multiLine="false">            
+            <!-- Specify choices here -->
+            <default>CSIVOL</default>
+        </string>
+    </variable>
+    <!--atCreate-->
+    <atCreate name="csihlq" scope="instance" required="true" prompt="true"/>    
+    <atCreate name="hlq" scope="instance" required="true" prompt="true"/>    
+    <atCreate name="csivol" scope="instance" required="false" prompt="true"/>    
+    <!--steps-->
+    <step name="stepName" optional="false">
+        <title>Execute SMP/E RECEIVE</title>
+        <description>Execute SMP/E RECEIVE</description>
+        <variableValue name="csihlq" scope="instance" noPromptIfSet="true" required="true"/>
+        <variableValue name="hlq" scope="instance" noPromptIfSet="true" required="true"/>
+        <variableValue name="csivol" scope="instance" noPromptIfSet="true" required="false"/>
+
+        <instructions substitution="true">SMPE RECEIVE to ${instance-csihlq}</instructions>
+        <weight>1</weight>
+        <autoEnable>true</autoEnable>
+        <canMarkAsFailed>true</canMarkAsFailed>
+        <!--template-->
+        <template>
+            <fileTemplate filePathSubstitution="true" substitution="true">ZWE2RCVE.vlt</fileTemplate>
+            <submitAs maxRc="0">JCL</submitAs>
+            <maxLrecl>80</maxLrecl>
+            <!-- zosmfOutput -->
+        </template>
+    </step>
+</workflow>

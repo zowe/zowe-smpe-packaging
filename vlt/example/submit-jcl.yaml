@@ -1,0 +1,10 @@
+instance-jobcard: "129300000,'ZOWE SMPE EXTRACT',
+
+  //             CLASS=C,REGION=0M,
+
+  //             MSGLEVEL=(1,1),MSGCLASS=X,TIME=NOLIMIT
+
+  /*JOBPARM SYSAFF=CA31"
+instance-csihlq: "USR.ZOWE"
+instance-hlq: "TMP.MCS"
+instance-csivol: "s"
