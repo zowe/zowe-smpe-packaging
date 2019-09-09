@@ -17,8 +17,9 @@
 //* java runtime directory
 //SMPJHOME DD PATHDISP=KEEP,
 // PATH='&DIR/SMPJHOME'  
-//* work directory
-//SMPWKDIR DD PATHDISP=KEEP,
-// PATH='&DIR/SMPWKDIR'  
+//* optional work directory
+//SMPWKDIR DD PATH='&DIR/SMPWKDIR',
+// PATHOPTS=(OWRONLY,OCREAT,OTRUNC), 
+// PATHMODE=SIRWXU                   
 //* package control tags
 //SYSIN    DD DISP=SHR,DSN=#gimzipHlq.SYSIN       
