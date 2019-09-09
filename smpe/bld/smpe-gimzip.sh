@@ -70,9 +70,9 @@ echo "-- preparing GIMZIP"
 _gimzipMeta
 
 echo list before linking
-ls -l $SMPCPATH 
-ls -l $SMPJHOME 
-ls -l $1
+ls -al $SMPCPATH 
+ls -al $SMPJHOME 
+ls -al $1
 
 echo  SMPCPATH $SMPCPATH 
 echo  SMPJHOME $SMPJHOME 
@@ -81,6 +81,9 @@ echo  1 $1
 echo ROOT $ROOT
 ls $ROOT
 ls $ROOT/work 
+
+echo scratch $scratch
+ls -al $scratch 
 
 _ln $SMPCPATH $scratch/SMPCPATH
 _ln $SMPJHOME $scratch/SMPJHOME
@@ -94,7 +97,7 @@ _ln $1        $scratch/SMPDIR
 _alloc "${gimzipHlq}.SMPOUT"   "FBA" "121" "PS" "1,1"
 _alloc "${gimzipHlq}.SYSPRINT" "FBA" "121" "PS" "1,1"
 _alloc "${gimzipHlq}.SYSIN"    "FB"   "80" "PS" "1,1"
-_cmd cp $ROOT/work/gimzip/AZWE001/$sysinGimzip "//'${gimzipHlq}.SYSIN'"
+_cmd cp $scratch/$sysinGimzip "//'${gimzipHlq}.SYSIN'"
 
 # any supported EXEC PGM=GIMZIP,PARM='...' parameter
 gimzipParm=''
@@ -195,7 +198,7 @@ echo     gimzipParm = \"$gimzipParm\"
 echo     gimzipHlq = \"$gimzipHlq\" 
 echo     gimzip = \"$gimzip\" 
 
-ln -s $ROOT/work/gimzip/AZWE001 /tmp/gimzip.$$  # otherwise it's too long for JCL
+ln -s $scratch /tmp/gimzip.$$  # otherwise it's too long for JCL
 echo link is
 ls -l /tmp/gimzip.$$
 ls -l $gimzip/SMPDIR
