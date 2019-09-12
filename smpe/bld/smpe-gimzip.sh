@@ -139,6 +139,7 @@ function runJob {
     for secs in 5 100 100 100 100 100 100 100 100 100 100
     do
         sleep $secs
+        date # what's the time?
         $operdir/opercmd "\$DJ${jobid},CC" > /tmp/dj.$$.cc
             # $DJ gives ...
             # ... $HASP890 JOB(JOB1)      CC=(COMPLETED,RC=0)  <-- accept this value
