@@ -72,7 +72,7 @@ node('ibm-jenkins-slave-nvm') {
 
   pipeline.packaging(
     name          : "zowe-smpe",
-    timeout       : [time: 60, unit: 'MINUTES'],
+    timeout       : [time: 90, unit: 'MINUTES'],
     operation: {
       pipeline.pax.pack(
           job             : "zowe-smpe-packaging",
