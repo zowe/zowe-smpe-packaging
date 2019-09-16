@@ -141,11 +141,11 @@ then                                          # data set does not exist
   then 
     # trap stderr, do not show alloc command (&2), but show error (&1)
     tsocmd "allocate new da('$dsn') $dsOrg $dcb" \
-      "space($space) tracks unit(sysallda) volume('zowe02')" 2> /dev/null
+      "space($space) tracks unit(sysallda) volume(ZOWE02)" 2> /dev/null
   else
     # Do NOT trap output, user must see alloc command (&2) & error (&1)
     tsocmd "allocate new da('$dsn') $dsOrg $dcb" \
-      "space($space) tracks unit(sysallda) volume('zowe02')" 2>&1
+      "space($space) tracks unit(sysallda) volume(ZOWE02)" 2>&1
   fi    #
   
   if test $? -eq 0
