@@ -33,14 +33,7 @@ if [ -z "${ZOWE_PAX}" ]; then
   echo "$FUNC[ERROR] Cannot find Zowe package."
   exit 1
 fi
-# find zowe cli
-ZOWE_CLI=$(ls -1 zowe-cli-*.zip)
-if [ -z "${ZOWE_CLI}" ]; then
-  echo "$FUNC[ERROR] Cannot find Zowe CLI package."
-  exit 2
-fi
 echo "$FUNC Zowe package is: ${ZOWE_PAX}"
-echo "$FUNC Zowe CLI package is: ${ZOWE_CLI}"
 
 SMPE_PAX=
 if [ -f "zowe-smpe.pax" ]; then
@@ -53,7 +46,6 @@ fi
 
 echo "$FUNC pareparing ${INPUT_TXT} ..."
 echo "${CURR_PWD}/${ZOWE_PAX}" > "${INPUT_TXT}"
-echo "${CURR_PWD}/${ZOWE_CLI}" >> "${INPUT_TXT}"
 echo "${CURR_PWD}/${SMPE_PAX}" >> "${INPUT_TXT}"
 echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
