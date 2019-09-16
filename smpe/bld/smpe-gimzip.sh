@@ -104,6 +104,12 @@ _cmd cp $scratch/$sysinGimzip "//'${gimzipHlq}.SYSIN'"
 gimzipParm=''
 test "$debug" && echo gimzipParm=$gimzipParm
 
+# do we have volser defined?
+volserParm=''
+if [ -n "$VOLSER" ]; then
+  volserParm=",VOLUME=SER=$VOLSER"
+fi
+
 # Create GIMZIP JCL
 SCRIPT_DIR=`pwd`
 SCRIPT="$(basename $0)"
@@ -199,6 +205,7 @@ echo  $SCRIPT editing gimzip.jcl
 echo     gimzipParm = \"$gimzipParm\" 
 echo     gimzipHlq = \"$gimzipHlq\" 
 echo     gimzip = \"$gimzip\" 
+echo     volserParm = \"$volserParm\" 
 
 ln -s $scratch /tmp/gimzip.$$  # otherwise it's too long for JCL
 echo link is
@@ -209,6 +216,7 @@ ls -l /tmp/gimzip.$$/SMPDIR
 sed "\
     s:#gimzipParm:$gimzipParm:; \
     s:#gimzipHlq:$gimzipHlq:; \
+    s:#volserParm:$volserParm:; \
     s:#dir:/tmp/gimzip.$$:; \
     "\
     $here/gimzip.jcl > $here/gimzip.sed.jcl
@@ -407,7 +415,7 @@ then
 fi    #
 
 # create target data set
-$here/$allocScript -h "$1" "$2" "$3" "$4" "$5"
+$here/$allocScript -h -V "$VOLSER" "$1" "$2" "$3" "$4" "$5"
 # returns 0 for OK, 1 for DCB mismatch, 2 for not pds(e), 8 for error
 rc=$?
 if test $rc -gt 0

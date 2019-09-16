@@ -62,6 +62,7 @@ mkdir -p zowe
 ./bld/smpe.sh \
   -i "${CURR_PWD}/${INPUT_TXT}" \
   -h "ZOWEAD3" \
+  -V "ZOWE02" \
   -v ${FMID_VERISON} \
   -r "${CURR_PWD}/zowe" \
   -d

@@ -146,7 +146,7 @@ _cmd umask 0022                                  # similar to chmod 755
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 # clear input variables
-unset alter YAML count HLQ input ROOT stopAt VRM fmid1 fmid2
+unset alter YAML count HLQ input ROOT VOLSER stopAt VRM fmid1 fmid2
 # do NOT unset debug
 
 # get startup arguments
@@ -159,6 +159,7 @@ do case "$opt" in
   h)   export HLQ="$OPTARG";;
   i)   export input="$OPTARG";;
   r)   export ROOT="$OPTARG";;
+  V)   export VOLSER="$OPTARG";;
   s)   export stopAt="$OPTARG";;
   v)   export VRM="$OPTARG";;
   1)   export fmid1="$OPTARG";;
