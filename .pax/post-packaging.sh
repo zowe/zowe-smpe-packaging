@@ -51,6 +51,9 @@ echo "$FUNC content of ${INPUT_TXT}:"
 cat "${INPUT_TXT}"
 mkdir -p zowe
 
+# ZOWEAD3 and ZOWE02 is specific parameter for packaging on Marist server
+# to package on another server, we may need different settings
+# or if the server is configured properly, may just remove -h and -V options.
 ./bld/smpe.sh \
   -i "${CURR_PWD}/${INPUT_TXT}" \
   -h "ZOWEAD3" \

@@ -53,7 +53,7 @@ unset pdse hide pds dir volume
 
 # Get startup arguments
 args="$@"
-while getopts ehpPV opt
+while getopts ehpP:V: opt
 do case "$opt" in
   e)   pdse="-e";;
   h)   hide="-h";;
