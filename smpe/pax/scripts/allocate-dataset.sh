@@ -17,7 +17,7 @@
 # -h        (optional) hide the allocate command being issued
 # -p        (optional) existing partitioned data set must be PDS
 # -P dirBlk (optional) allocate data set as PDS with x directory blocks
-# -V volume (optional) allocate data set on specific volume
+# -L volume (optional) allocate data set on specific volume
 # dsn       data set name
 # recFm     record format; {FB | FBA | U | VB | VBA}
 # lRecL     logical record length, use ** for RECFM(U)
@@ -53,13 +53,13 @@ unset pdse hide pds dir volume
 
 # Get startup arguments
 args="$@"
-while getopts ehpP:V: opt
+while getopts ehpP:L: opt
 do case "$opt" in
   e)   pdse="-e";;
   h)   hide="-h";;
   p)   pds="-p";;
   P)   dir="$OPTARG";;
-  V)   volume="$OPTARG";;
+  L)   volume="$OPTARG";;
   [?]) echo "** ERROR $(basename $0) faulty startup argument: $@"
        test ! "$IgNoRe_ErRoR" && exit 8;;                        # EXIT
   esac    # $opt

@@ -415,7 +415,7 @@ then
 fi    #
 
 # create target data set
-$here/$allocScript -h -V "$VOLSER" "$1" "$2" "$3" "$4" "$5"
+$here/$allocScript -h -L "$VOLSER" "$1" "$2" "$3" "$4" "$5"
 # returns 0 for OK, 1 for DCB mismatch, 2 for not pds(e), 8 for error
 rc=$?
 if test $rc -gt 0

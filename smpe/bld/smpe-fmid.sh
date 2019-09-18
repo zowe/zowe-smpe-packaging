@@ -108,7 +108,7 @@ julian=$(date +%Y%j)                                          # YYYYddd
 test "$debug" && julian=$julian
 
 # validate/create target data set
-$here/$allocScript -V "$VOLSER" $dsn "FB" "80" "PS" "1,1"
+$here/$allocScript -L "$VOLSER" $dsn "FB" "80" "PS" "1,1"
 # returns 0 for OK, 1 for DCB mismatch, 2 for not pds(e), 8 for error
 rc=$?
 if test $rc -eq 0
@@ -226,7 +226,7 @@ test "$debug" && echo && echo "> _copyMvsMvs $@"
 echo "-- populate $2 with $1"
 
 # create target data set
-$here/$allocScript -V "$VOLSER" "$2" "$3" "$4" "$5" "$6"
+$here/$allocScript -L "$VOLSER" "$2" "$3" "$4" "$5" "$6"
 # returns 0 for OK, 1 for DCB mismatch, 2 for not pds(e), 8 for error
 rc=$?
 if test $rc -eq 0
@@ -273,7 +273,7 @@ test "$debug" && echo && echo "> _copyUssMvs $@"
 echo "-- populate $2 with $1"
 
 # validate/create target data set
-$here/$allocScript -V "$VOLSER" "$2" "$3" "$4" "$5" "$6"
+$here/$allocScript -L "$VOLSER" "$2" "$3" "$4" "$5" "$6"
 # returns 0 for OK, 1 for DCB mismatch, 2 for not pds(e), 8 for error
 rc=$?
 if test $rc -eq 0
